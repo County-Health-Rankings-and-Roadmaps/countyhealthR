@@ -3,7 +3,7 @@ Type: Package
 Title: Easy access to County Health Rankings & Roadmaps data 
 Version: 0.1.0
 Author: Hannah      
-Maintainer: holsonwillia@wisc.edu
+Maintainer: Hannah Olson-Williams <holsonwillia@wisc.edu>
 Description: Provides a simple interface to pull County Health Rankings measure data directly from GitHub, similar to tidycensus.
 License: TBD 
 Encoding: UTF-8
