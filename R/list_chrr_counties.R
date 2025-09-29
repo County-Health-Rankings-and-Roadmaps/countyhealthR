@@ -1,28 +1,33 @@
-#' List available counties for a given state
+#' List available counties for one or more states
 #'
-#' @param state Character. State abbreviation (e.g. "WI") or full state name (e.g. "Wisconsin").
+#' @param state Character vector. State abbreviation(s) (e.g. "WI") or full state name(s) (e.g. "Wisconsin").
 #' @return A tibble with columns: state, county, statecode, countycode, fipscode.
 #' @export
 #' @examples
 #' \dontrun{
 #' list_chrr_counties("WI")
-#' list_chrr_counties("Wisconsin")
-#' list_chrr_counties("wi")
-#' list_chrr_counties("wisconsin")
+#' list_chrr_counties(c("WI", "MN"))
+#' list_chrr_counties(c("Wisconsin", "Minnesota"))
+#' list_chrr_counties(c("wi", "mn"))
 #' }
 list_chrr_counties <- function(state) {
   # Normalize input
   state <- stringr::str_trim(state)
   state <- stringr::str_to_title(state)
 
-  # Handle abbreviations
-  if (toupper(state) %in% state.abb) {
-    state_abbrev <- toupper(state)
-  } else if (state %in% state.name) {
-    state_abbrev <- state.abb[match(state, state.name)]
-  } else {
-    stop("Input must be a valid state abbreviation or state name.")
-  }
+  # Map state names/abbreviations to abbreviations
+  state_abbrevs <- purrr::map_chr(state, function(x) {
+    if (toupper(x) %in% state.abb) {
+      toupper(x)
+    } else if (x %in% state.name) {
+      state.abb[match(x, state.name)]
+    } else {
+      stop(paste0("Invalid state input: ", x))
+    }
+  })
+
+
+
 
   # Download county FIPS file
   url <- "https://github.com/County-Health-Rankings-and-Roadmaps/chrr_measure_calcs/raw/main/inputs/county_fips.sas7bdat"
@@ -32,7 +37,7 @@ list_chrr_counties <- function(state) {
 
   # Filter by normalized abbreviation
   df <- counties %>%
-    dplyr::filter(state == !!state_abbrev) %>%
+    dplyr::filter(state %in% state_abbrevs) %>%
     dplyr::select(state, county, statecode, countycode, fipscode) %>%
     dplyr::arrange(county)
 
