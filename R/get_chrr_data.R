@@ -5,20 +5,43 @@
 #' @param years Integer or character vector of release years (e.g. 2023). If NULL and the other two are supplied, the function will search all available years.
 #' @param measures Character or numeric vector of measure IDs.
 #' @param counties Character vector of county inputs. Accepts 5-digit FIPS (e.g. "55025" or 55025), county names ("Dane County", "Dane", "Dane, WI"), case-insensitive.
+#' @param geography Character. One of "county", "state", or "US". Default = "county".
+#' @param state Character vector of state abbreviations or names (required if geography = "state").
 #' @return A tibble with the requested CHRR measure data (columns from the relational csv + `year`).
 #' @export
 #' @examples
 #' \dontrun{
-#' # Year + county
+#' # Year + county (returns data for all measures for the specified county)
 #' get_chrr_data(years = 2023, counties = "Dane County")
 #'
-#' # Year + measure
+#' # Year + measure (returns data for all counties nationwide)
 #' get_chrr_data(years = 2023, measures = c("Premature_death"))
 #'
-#' # County + measure (all years)
+#' # County + measure (returns data for all years)
 #' get_chrr_data(counties = "Dane County", measures = "Premature_death")
+#'
+#' # Year + measure + geography = "state" (returns state-level data for the specified state)
+#' get_chrr_data(years = 2023, measures = "Premature_death", geography = "state", state = "WI")
+#'
+#' Year + measure + geography = "US" (returns national-level data)
+#' get_chrr_data(years = 2023, measures = "Premature_death", geography = "US")
 #' }
-get_chrr_data <- function(years = NULL, measures = NULL, counties = NULL) {
+get_chrr_data <- function(years = NULL,
+                          measures = NULL,
+                          counties = NULL,
+                          state = NULL,
+                          geography = c("county", "state", "us")
+                          ) {
+  geography <- match.arg(geography)
+
+  # ---- validate inputs by geography ----
+  if (geography == "state" && is.null(state)) {
+    stop("If geography = 'state', you must provide the `state` parameter.")
+  }
+  if (geography == "county" && is.null(counties)) {
+    stop("If geography = 'county', you must provide the `counties` parameter.")
+  }
+
   # ---- require at least two of three ----
   n_supplied <- sum(!is.null(years), !is.null(measures), !is.null(counties))
   if (n_supplied < 2) {
@@ -41,7 +64,7 @@ get_chrr_data <- function(years = NULL, measures = NULL, counties = NULL) {
 
   # ---- prepare county FIPS if counties provided ----
   county_fips_vec <- NULL
-  if (!is.null(counties)) {
+  if (geography == "county" && !is.null(counties)) {
     # download county fips SAS file
     url_cnty <- "https://raw.githubusercontent.com/County-Health-Rankings-and-Roadmaps/chrr_measure_calcs/main/inputs/county_fips.sas7bdat"
     tmp_cnty <- tempfile(fileext = ".sas7bdat")
@@ -154,6 +177,20 @@ get_chrr_data <- function(years = NULL, measures = NULL, counties = NULL) {
     if (length(found_fips) == 0) stop("No county FIPS codes matched your `counties` input.")
     county_fips_vec <- found_fips
   } # end if counties provided
+
+
+  # ---- build state_abbrev_vec if geography = state ----
+  state_abbrev_vec <- NULL
+  if (geography == "state" && !is.null(state)) {
+    state_abbrev_vec <- purrr::map_chr(state, function(s) {
+      s_trim <- stringr::str_trim(s)
+      if (toupper(s_trim) %in% state.abb) return(toupper(s_trim))
+      nm <- stringr::str_to_title(s_trim)
+      if (nm %in% state.name) return(state.abb[match(nm, state.name)])
+      stop(paste0("Invalid state input: ", s))
+    })
+  }
+
 
   # ---- download & filter per year ----
   out_list <- list()
