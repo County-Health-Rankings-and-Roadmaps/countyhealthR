@@ -1,0 +1,15 @@
+utils::globalVariables(c(".env", "county", "countycode", "description",
+                         "fipscode", "measure_id", "measure_name",
+                         "state.abb", "state.name", "state_fips",
+                         "statecode", "year"))
+
+
+.onLoad <- function(libname, pkgname) {
+  # Example: set package options
+  options(countyhealthR.verbose = TRUE)
+}
+
+
+.onAttach <- function(libname, pkgname) {
+  packageStartupMessage("countyhealthR loaded. Use list_chrr_measures() to start.")
+}
