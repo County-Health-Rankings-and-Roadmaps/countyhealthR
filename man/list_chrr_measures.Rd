@@ -10,7 +10,7 @@ list_chrr_measures(release_year = 2023)
 \item{release_year}{Numeric year. This corresponds to the year of CHR&R's annual data release.}
 }
 \value{
-A tibble with measure_id and measure_name.
+A tibble with measure_id, measure_name, and description.
 }
 \description{
 Downloads metadata for measures and returns their IDs and names.

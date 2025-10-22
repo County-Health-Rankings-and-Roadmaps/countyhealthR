@@ -1,11 +1,13 @@
-#' Retrieve County Health Rankings & Roadmaps data from GitHub
+#' Retrieve County Health Rankings & Roadmaps measure data from GitHub
 #'
 #' @description
 #' Downloads and filters County Health Rankings & Roadmaps (CHR&R) data directly
-#' from the open-source GitHub repository
+#' from the measure calculations GitHub repository
 #' (<https://github.com/County-Health-Rankings-and-Roadmaps/chrr_measure_calcs>).
-#' The function mimics the style and behavior of \code{tidycensus::get_decennial()},
-#' allowing users to specify geography, variable, and release year.
+#' Users provide the measure ID, geography type, and release year as inputs.
+#' The function returns data for the specified measure across the specified geography
+#' for the given release year. It mimics the style and behavior of
+#' \code{tidycensus::get_decennial()}.
 #'
 #' @param geography A string specifying the level of geography to return.
 #'   Options are:
@@ -15,12 +17,14 @@
 #'     \item \code{"national"} – returns only national-level estimates (\code{state_fips == "00"}).
 #'   }
 #'
-#' @param variable Either:
+#' @param measure Either:
 #'   \itemize{
-#'     \item A numeric \code{measure_id} (e.g., \code{101}), or
-#'     \item A character string matching all or part of a \code{measure_name}
+#'     \item A numeric \code{measure_id} (e.g., \code{21}, \code{85}, etc.), or
+#'     \item A character string matching a \code{measure_name}
 #'       (case-insensitive).
 #'   }
+#'   Use the \code{list_chrr_measures()} function to print all available
+#'   \code{measure_id}s and \code{measure_name}s for a given release year.
 #'
 #' @param release_year A numeric year corresponding to a CHR&R release year folder.
 #'   Must match one of the year-specific subfolders available in the GitHub
@@ -41,21 +45,30 @@
 #' For state-level data, rows where \code{state_fips != "00"} are retained.
 #'
 #' @return
-#' A tibble containing filtered CHRR data for the requested geography, variable,
+#' A tibble containing filtered CHRR data for the requested geography, measure,
 #' and release year. Typical columns include:
 #' \code{state_fips}, \code{county_fips}, \code{measure_id},
 #' \code{measure_name}, \code{release_year}, and \code{value}.
 #'
 #' @examples
 #' \dontrun{
-#' # Get county-level data for measure 101 in 2023
-#' county_data <- get_chrr_data(geography = "county", variable = 101, release_year = 2023)
+#' # Get county-level data for measure 21 (high school graduation) in 2023
+#' county_data <- get_chrr_measure_data(
+#'                   geography = "county",
+#'                   measure = 21,
+#'                   release_year = 2023)
 #'
-#' # Get state-level data for "obesity" in 2022
-#' state_data <- get_chrr_data(geography = "state", variable = "obesity", release_year = 2022)
+#' # Get state-level data for "Insufficient Sleep" in 2022
+#' state_data <- get_chrr_measure_data(
+#'                   geography = "state",
+#'                   measure = "insufficient sleep",
+#'                   release_year = 2022)
 #'
-#' # Get national-level data for "smoking" in 2024
-#' nat_data <- get_chrr_data(geography = "national", variable = "smoking", release_year = 2024)
+#' # Get national-level data for "Uninsured" in 2024
+#' nat_data <- get_chrr_measure_data(
+#'                   geography = "national",
+#'                   measure = "uninsured",
+#'                   release_year = 2024)
 #' }
 #'
 #' @importFrom dplyr filter %>% select mutate
@@ -66,14 +79,9 @@
 
 
 
-get_chrr_data <- function(geography = c("county", "state", "national"),
-                          variable,
+get_chrr_measure_data <- function(geography = c("county", "state", "national"),
+                          measure,
                           release_year) {
-  # Load required packages
-  require(dplyr)
-  require(stringr)
-  require(readr)
-
   # Validate geography argument
   geography <- match.arg(geography)
 
@@ -82,20 +90,20 @@ get_chrr_data <- function(geography = c("county", "state", "national"),
 
   # Load the relational data index
   index_url <- paste0(base_url, "t_measure_years.csv") # or whichever file lists measure_id/name
-  measure_info <- read_csv(index_url, show_col_types = FALSE)
+  measure_info <- readr::read_csv(index_url, show_col_types = FALSE)
 
   # --- Subset measure info by year first ---
-  measure_info <- measure_info %>% filter(year == !!release_year)
+  measure_info <- measure_info %>% dplyr::filter(year == !!release_year)
 
-  # Match the variable by ID or by partial measure_name (case-insensitive)
-  if (is.numeric(variable)) {
-    var_info <- measure_info %>% filter(measure_id == variable)
+  # Match the measure by ID or by partial measure_name (case-insensitive)
+  if (is.numeric(measure)) {
+    var_info <- measure_info %>% dplyr::filter(measure_id == measure)
   } else {
     var_info <- measure_info %>%
-      filter(str_detect(str_to_lower(measure_name), str_to_lower(variable)))
+      dplyr::filter(str_detect(str_to_lower(measure_name), str_to_lower(measure)))
   }
 
-  if (nrow(var_info) == 0) stop("No matching variable found.")
+  if (nrow(var_info) == 0) stop("No matching measure found.")
   if (nrow(var_info) > 1) {
     message("Multiple matches found, returning first match:\n")
     print(var_info)
@@ -114,15 +122,15 @@ get_chrr_data <- function(geography = c("county", "state", "national"),
   }
 
   # --- Load the appropriate dataset ---
-  df <- read_csv(data_url, show_col_types = FALSE)
+  df <- readr::read_csv(data_url, show_col_types = FALSE)
 
   # --- Filter to the selected measure and geography ---
-  df_out <- df %>% filter(measure_id == var_id)
+  df_out <- df %>% dplyr::filter(measure_id == var_id)
 
   if (geography == "national") {
-    df_out <- df_out %>% filter(state_fips == "00")
+    df_out <- df_out %>% dplyr::filter(state_fips == "00")
   } else if (geography == "state") {
-    df_out <- df_out %>% filter(state_fips != "00")
+    df_out <- df_out %>% dplyr::filter(state_fips != "00")
   }
 
   return(df_out)

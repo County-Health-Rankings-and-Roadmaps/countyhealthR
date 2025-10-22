@@ -4,7 +4,7 @@
 #'
 #' @param release_year Numeric year. This corresponds to the year of CHR&R's annual data release.
 #'
-#' @return A tibble with measure_id and measure_name.
+#' @return A tibble with measure_id, measure_name, and description.
 #' @export
 #'
 #' @examples
@@ -21,6 +21,6 @@ list_chrr_measures <- function(release_year = 2023) {
   df <- readr::read_csv(tmp, show_col_types = FALSE)
 
   df %>%
-    filter(year == .env$release_year) %>%
+    dplyr::filter(year == .env$release_year) %>%
     dplyr::select(measure_id, measure_name, description)
 }
