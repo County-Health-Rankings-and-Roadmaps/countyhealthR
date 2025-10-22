@@ -58,6 +58,12 @@
 #'                   measure = 21,
 #'                   release_year = 2023)
 #'
+#' # Get county-level data for access to exercise (132) in 2025
+#' county_data <- get_chrr_measure_data(
+#'                   geography = "county",
+#'                   measure = "access to exercise",
+#'                   release_year = 2023)
+#'
 #' # Get state-level data for "Insufficient Sleep" in 2022
 #' state_data <- get_chrr_measure_data(
 #'                   geography = "state",
