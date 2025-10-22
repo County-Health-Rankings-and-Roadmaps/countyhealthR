@@ -15,6 +15,7 @@
 #' \dontrun{
 #' get_chrr_measure_metadata(21, 2024)
 #' get_chrr_measure_metadata("Uninsured adults", 2022)
+#' get_chrr_measure_metadata("High school graduation", 2025)
 #' }
 #' @export
 get_chrr_measure_metadata <- function(measure, release_year) {
