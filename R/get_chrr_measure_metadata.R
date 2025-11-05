@@ -20,14 +20,24 @@
 #' @export
 get_chrr_measure_metadata <- function(measure, release_year) {
 
-  # Load supporting CSVs from GitHub
-  mea_years <- read_csv_github(file.path(DATA_DIR, "t_measure_years.csv")) %>%
-    dplyr::select(year, measure_id, years_used)
+  message("Loading measure metadata from Zenodo...")
 
-  mea_compare <- read_csv_github(file.path(DATA_DIR, "t_measure.csv"))
-  cat_names <- read_csv_github(file.path(DATA_DIR, "t_category.csv"))
-  fac_names <- read_csv_github(file.path(DATA_DIR, "t_factor.csv"))
-  foc_names <- read_csv_github(file.path(DATA_DIR, "t_focus_area.csv"))
+  # Load supporting CSVs from Zenodo
+  mea_years   <- read_csv_zenodo(filename = "t_measure_years.csv") %>%
+    dplyr::select(year, measure_id, years_used)
+  mea_compare <- read_csv_zenodo("t_measure.csv")
+  cat_names <- read_csv_zenodo("t_category.csv")
+  fac_names <- read_csv_zenodo("t_factor.csv")
+  foc_names <- read_csv_zenodo("t_focus_area.csv")
+
+  # --- Validate release_year dynamically ---
+  valid_years <- unique(mea_years$year)
+  if (!(release_year %in% valid_years)) {
+    stop(
+      "Invalid release_year: ", release_year, ". ",
+      "Available years are: ", paste(sort(valid_years), collapse = ", "), "."
+    )
+  }
 
   # Combine measure metadata
   mea_names <- mea_years %>%
@@ -66,7 +76,10 @@ get_chrr_measure_metadata <- function(measure, release_year) {
 
   # Print nicely
   if (nrow(metadata) == 0) {
-    message("No metadata found for the measure: ", measure)
+    message(
+      "No metadata found for the measure: ", measure, ". ",
+      "Use list_chrr_measures(release_year = ", release_year, ") to see available measure_ids and measure_names for ", release_year, "."
+    )
     return(invisible(NULL))
   }
 
