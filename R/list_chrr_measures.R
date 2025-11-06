@@ -12,13 +12,19 @@
 #' list_chrr_measures(2023)
 #' }
 list_chrr_measures <- function(release_year = 2023) {
-  url <- glue::glue(
-    "https://raw.githubusercontent.com/County-Health-Rankings-and-Roadmaps/chrr_measure_calcs/main/relational_data/t_measure_years.csv"
-  )
+  message("Loading measure metadata from Zenodo...")
 
-  tmp <- tempfile(fileext = ".csv")
-  utils::download.file(url, tmp, mode = "wb", quiet = TRUE)
-  df <- readr::read_csv(tmp, show_col_types = FALSE)
+  # Load the measure-year index from Zenodo root
+  df <- read_csv_zenodo(filename = "t_measure_years.csv")
+
+  # Validate that release_year exists
+  valid_years <- unique(df$year)
+  if (!(release_year %in% valid_years)) {
+    stop(
+      "Invalid release_year: ", release_year, ". ",
+      "Available years are: ", paste(sort(valid_years), collapse = ", "), "."
+    )
+  }
 
   df %>%
     dplyr::filter(year == .env$release_year) %>%

@@ -11,5 +11,5 @@ utils::globalVariables(c(".env", "county", "countycode", "description",
 
 
 .onAttach <- function(libname, pkgname) {
-  packageStartupMessage("countyhealthR loaded. Use list_chrr_measures() to start.")
+  packageStartupMessage("countyhealthR loaded. Use list_chrr_measures() to see all measures of health available for a specified release_year.")
 }

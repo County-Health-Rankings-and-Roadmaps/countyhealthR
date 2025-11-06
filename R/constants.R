@@ -1,6 +1,5 @@
-# ---- Repo Config ----
-GITHUB_OWNER  <- Sys.getenv("CHD_GITHUB_OWNER",  unset = "County-Health-Rankings-and-Roadmaps")
-GITHUB_REPO   <- Sys.getenv("CHD_GITHUB_REPO",   unset = "chrr_measure_calcs")
-GITHUB_BRANCH <- Sys.getenv("CHD_GITHUB_BRANCH", unset = "main")
-DATA_DIR      <- Sys.getenv("CHD_DATA_DIR",      unset = "relational_data")
-GITHUB_TOKEN  <- Sys.getenv("GITHUB_TOKEN", unset = NA)
+# ---- Zenodo Config ----
+ZENODO_RECORD <- "17537523"
+ZENODO_BASE_URL <- paste0("https://zenodo.org/records/", ZENODO_RECORD, "/files/")
+CACHE_DIR <- rappdirs::user_data_dir("countyhealthR_data")
+
