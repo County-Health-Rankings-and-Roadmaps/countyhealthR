@@ -3,7 +3,7 @@
 #' @description
 #' Downloads and filters County Health Rankings & Roadmaps (CHR&R) data directly
 #' from the Zenodo archive
-#' (<https://zenodo.org/records/17419267>).
+#' (<https://zenodo.org/records/18157793>).
 #' Users provide the measure ID, geography type, and release year as inputs.
 #' The function returns data for the specified measure across the specified geography
 #' for the given release year. It mimics the style and behavior of
@@ -31,7 +31,7 @@
 #'   repository.
 #'
 #' @details
-#' The function first reads the measure-year index (\code{t_measure_years.csv}) to
+#' The function first reads the measure-year index to
 #' identify available measures for the specified year, then automatically retrieves
 #' the correct data file:
 #' \itemize{
@@ -134,12 +134,18 @@ get_chrr_measure_data <- function(geography = c("county", "state", "national"),
 
   # --- Use vroom for large county files, readr for smaller ones ---
   if (geography == "county") {
-    data_dir <- prepare_zenodo_data(release_year, refresh)
-    file_path <- file.path(data_dir, file_name)
+    file_path <- file.path(
+      prepare_zenodo_data(release_year, refresh),
+      file_name
+    )
 
-    if (!file.exists(file_path)) {
-      stop("County data file not found: ", file_path)
-    }
+    # Ensure file is downloaded (Zenodo-native behavior)
+    read_csv_zenodo(
+      filename = file_name,
+      year     = release_year,
+      refresh  = refresh
+    )
+
 
     # Specify column types for speed
     col_types <- cols(
@@ -153,11 +159,21 @@ get_chrr_measure_data <- function(geography = c("county", "state", "national"),
     )
 
     message("Loading county data...")
-    df <- vroom(file_path, delim = ",", col_types = col_types, progress = FALSE)
+    df <- read_csv_zenodo(
+      filename = file_name,
+      year     = release_year,
+      refresh  = refresh
+    )
+
 
   } else {
     # Small file, read_csv is fine
-    df <- read_csv_zenodo(release_year, file_name)
+    df <- read_csv_zenodo(
+      filename = file_name,
+      year     = release_year,
+      refresh  = refresh
+    )
+
   }
 
   # --- Filter by measure ---
