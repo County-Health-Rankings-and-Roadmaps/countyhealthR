@@ -151,7 +151,7 @@ get_chrr_measure_data <- function(geography = c("county", "state", "national"),
 
 
     # Specify column types for speed
-    col_types <- cols(
+    col_types <- readr::cols(
       state_fips  = readr::col_character(),
       county_fips = readr::col_character(),
       measure_id  = readr::col_integer(),
