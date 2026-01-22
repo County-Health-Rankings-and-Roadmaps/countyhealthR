@@ -3,7 +3,7 @@
 #' @description
 #' Downloads and filters County Health Rankings & Roadmaps (CHR&R) data directly
 #' from the Zenodo archive
-#' (<https://zenodo.org/records/18157793>).
+#' (<https://doi.org/10.5281/zenodo.18157681>).
 #' Users provide the measure ID, geography type, and release year as inputs.
 #' The function returns data for the specified measure across the specified geography
 #' for the given release year. It mimics the style and behavior of
@@ -132,6 +132,9 @@ get_chrr_measure_data <- function(geography = c("county", "state", "national"),
     paste0("t_state_data_years_", release_year, ".csv")
   }
 
+  # --- Print Zenodo citation ---
+  print_zenodo_citation(year = release_year, zenodo_record_id = record_id)
+
   # --- Use vroom for large county files, readr for smaller ones ---
   if (geography == "county") {
     file_path <- file.path(
@@ -158,7 +161,6 @@ get_chrr_measure_data <- function(geography = c("county", "state", "national"),
      .default    = col_guess()  # everything else is guessed automatically
     )
 
-    message("Loading county data...")
     df <- read_csv_zenodo(
       filename = file_name,
       year     = release_year,
