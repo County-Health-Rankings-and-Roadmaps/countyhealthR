@@ -8,6 +8,6 @@ library(devtools)
 devtools::install_github("County-Health-Rankings-and-Roadmaps/countyhealthR")
 library(countyhealthR)
 
-# Example: county-level "premature death" data for 2024
+# Example: load county-level premature death data for release year 2024
 get_chrr_measure_data("county", "premature death", 2024)
 ``` 
