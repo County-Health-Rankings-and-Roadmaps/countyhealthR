@@ -1,163 +1,162 @@
-# ---- Zenodo Helpers ----
-
-# DOI that always points to the *latest* version of CHRR relational data on zenodo
-ZENODO_DOI <- "10.5281/zenodo.17419266"
-
-# Function: dynamically fetch the latest Zenodo record ID via the API
-get_latest_zenodo_id <- function(doi = ZENODO_DOI) {
-  api_url <- paste0("https://zenodo.org/api/records/?q=doi:", doi)
-  tmpfile <- tempfile(fileext = ".json")
-
-  tryCatch({
-    utils::download.file(api_url, tmpfile, quiet = TRUE)
-    json <- jsonlite::fromJSON(tmpfile)
-
-    # Extract record ID for latest version
-    if (!is.null(json$hits$hits[[1]]$id)) {
-      latest_id <- json$hits$hits[[1]]$id
-      return(latest_id)
-    } else {
-      warning("Could not retrieve latest Zenodo record ID; using fallback ID.")
-      return("17537523") # fallback to your known latest version
-    }
-  }, error = function(e) {
-    warning("Error fetching latest Zenodo ID from API: ", e$message)
-    return("17537523") # fallback
-  })
-}
-
-# Cache the ID once per session
-ZENODO_RECORD_ID <- get_latest_zenodo_id()
-
-# Build the base URL dynamically
-ZENODO_BASE_URL <- paste0("https://zenodo.org/records/", ZENODO_RECORD_ID, "/files/")
-
-# Cache directory for storing downloaded data
-CACHE_DIR <- file.path(rappdirs::user_cache_dir("countyhealthR_data"), "Cache")
-
-# List of known metadata files stored at the Zenodo root
-ROOT_LEVEL_FILES <- c(
-  "t_measure.csv",
-  "t_measure_years.csv",
-  "t_factor.csv",
-  "t_focus_area.csv",
-  "t_category.csv"
+### Zenodo year records
+zenodo_year_records <- c(
+  "2010" = "18157682",
+  "2011" = "18157793",
+  "2012" = "18331277",
+  "2013" = "18331501",
+  "2014" = "18331638",
+  "2015" = "18331640",
+  "2016" = "18331650",
+  "2017" = "18331653",
+  "2018" = "18331964",
+  "2019" = "18331968",
+  "2020" = "18331971",
+  "2021" = "18331979",
+  "2022" = "18331986",
+  "2023" = "18331991",
+  "2024" = "18331995",
+  "2025" = "18332002"
 )
 
 
-#' Download and prepare CHR&R data for a given release year from Zenodo
-#'
-#' @param release_year Numeric year (e.g. 2022)
-#' @param refresh Logical; if TRUE, re-download even if cached
-#' @return Path to the extracted data directory for that year
-#' @keywords internal
-prepare_zenodo_data <- function(release_year, refresh = FALSE) {
-  if (!dir.exists(CACHE_DIR)) dir.create(CACHE_DIR, recursive = TRUE)
 
-  zip_name <- paste0(release_year, ".zip")
-  zip_url  <- paste0(ZENODO_BASE_URL, zip_name)
-  zip_path <- file.path(CACHE_DIR, zip_name)
-  extract_dir <- file.path(CACHE_DIR, as.character(release_year))
+### resolve zenodo record
+resolve_zenodo_record <- function(year, concept_doi = "10.5281/zenodo.18157681") {
 
-  # Optionally refresh cache
-  if (refresh && dir.exists(extract_dir)) {
-    message("Refreshing cached data for ", release_year, "...")
-    unlink(c(zip_path, extract_dir), recursive = TRUE)
+  query <- paste0("county health rankings ", year)
+
+  if (!is.null(concept_doi)) {
+    query <- paste(query, concept_doi)
   }
 
-  # Download if not cached
-  if (!file.exists(zip_path)) {
-    message("Downloading CHR&R ", release_year, " data from Zenodo...")
-    utils::download.file(
-      url = zip_url,
-      destfile = zip_path,
-      mode = "wb",
-      quiet = FALSE,
-      timeout = 600
-    )
-  } else {
-    message("Using cached archive for ", release_year)
+  url <- paste0(
+    "https://zenodo.org/api/records?q=",
+    URLencode(query),
+    "&sort=mostrecent"
+  )
+
+  resp <- jsonlite::fromJSON(url)
+
+  if (length(resp$hits$hits) == 0) {
+    stop("No Zenodo records found for year ", year)
   }
 
-  # Unzip if needed
-  if (!dir.exists(extract_dir)) {
-    message("Unzipping data for ", release_year, " (first time only)...")
-    utils::unzip(zip_path, exdir = extract_dir)
-  }
-
-  # Detect where CSVs actually are
-  files <- list.files(extract_dir, pattern = "\\.csv$", recursive = TRUE, full.names = TRUE)
-  if (length(files) == 0) {
-    stop("No CSV files found after unzipping ", release_year, ". Check the ZIP structure.")
-  }
-
-  csv_dir <- unique(dirname(files))
-  if (length(csv_dir) > 1) {
-    warning("Multiple subdirectories detected in ", release_year, ". Using first.")
-    csv_dir <- csv_dir[1]
-  }
-
-  return(csv_dir)
+  # Take most recent release
+  resp$hits$hits[[1]]$id
 }
 
-
-#' Read a CSV from Zenodo (root-level or year-specific)
-#'
-#' @param filename The CSV file name
-#' @param year Optional numeric year (for year-specific files)
-#' @param refresh Logical; if TRUE, re-download even if cached
-#' @return A tibble
-#' @keywords internal
+### Read CSV from Zenodo (robust)
 read_csv_zenodo <- function(filename, year = NULL, refresh = FALSE) {
-  cache_dir <- CACHE_DIR
+  cache_dir <- file.path(rappdirs::user_cache_dir("countyhealthR_data"), "Cache")
   dir.create(cache_dir, recursive = TRUE, showWarnings = FALSE)
 
-  # --- Case 1: Root-level metadata files ---
-  if (filename %in% ROOT_LEVEL_FILES) {
-    file_path <- file.path(cache_dir, filename)
-    file_url  <- paste0(ZENODO_BASE_URL, filename)
+  if(!is.null(year)) {
+    year <- as.character(year)
+    year_dir <- prepare_zenodo_data(year, refresh)
+    record_id <- attr(year_dir, "zenodo_record_id")
+    file_path <- file.path(year_dir, filename)
+    file_url <- paste0("https://zenodo.org/records/", record_id, "/files/", filename, "?download=1")
 
-    if (!file.exists(file_path) || refresh) {
-      message("Downloading shared metadata file from Zenodo...")
-      utils::download.file(file_url, file_path, mode = "wb", quiet = FALSE)
+    # Print citation
+    print_zenodo_citation(year)
+
+    if(!file.exists(file_path) || refresh) {
+      message("Downloading ", filename, " (", year, ") from Zenodo...")
+      download_zenodo_file(file_url, file_path)
     }
-
-    return(readr::read_csv(file_path, show_col_types = FALSE))
-  }
-
-  # --- Case 2: Year-specific files ---
-  if (is.null(year)) {
-    stop("Must provide `year` for year-specific data files like county/state/national data.")
-  }
-
-  zip_name <- paste0(year, ".zip")
-  zip_url  <- paste0(ZENODO_BASE_URL, zip_name)
-  zip_path <- file.path(cache_dir, zip_name)
-  extract_dir <- file.path(cache_dir, as.character(year))
-
-  # Download year ZIP if needed
-  if (!file.exists(zip_path) || refresh) {
-    message("Downloading ", zip_name, " from Zenodo...")
-    utils::download.file(zip_url, zip_path, mode = "wb", quiet = FALSE, timeout = 600)
   } else {
-    message("Using cached archive for ", year)
-  }
-
-  # Unzip if not yet extracted
-  if (!dir.exists(extract_dir) || refresh) {
-    message("Unzipping ", zip_name, "...")
-    utils::unzip(zip_path, exdir = extract_dir)
-  }
-
-  file_path <- file.path(extract_dir, filename)
-  if (!file.exists(file_path)) {
-    subfolder_path <- file.path(extract_dir, as.character(year), filename)
-    if (file.exists(subfolder_path)) {
-      file_path <- subfolder_path
-    } else {
-      stop("File not found in ", year, ".zip: ", filename)
+    file_path <- file.path(cache_dir, filename)
+    root_url <- paste0("https://zenodo.org/records/18157793/files/", filename, "?download=1")
+    if(!file.exists(file_path) || refresh) {
+      message("Downloading root-level file from Zenodo...")
+      download_zenodo_file(root_url, file_path)
     }
   }
 
   readr::read_csv(file_path, show_col_types = FALSE)
+}
+
+
+### prepare zenodo data
+prepare_zenodo_data <- function(release_year, refresh = FALSE) {
+
+  release_year <- as.character(release_year)
+
+  cache_dir <- file.path(
+    rappdirs::user_cache_dir("countyhealthR_data"),
+    "Cache"
+  )
+  dir.create(cache_dir, recursive = TRUE, showWarnings = FALSE)
+
+  year_dir <- file.path(cache_dir, release_year)
+
+  # Handle refresh
+  if (refresh && dir.exists(year_dir)) {
+    message("Refreshing cached data for ", release_year, "...")
+    unlink(year_dir, recursive = TRUE)
+  }
+
+  dir.create(year_dir, showWarnings = FALSE)
+
+  # Resolve Zenodo record (pinned or evolving)
+  record_id <- zenodo_year_records[[release_year]]
+
+  if (is.na(record_id)) {
+    message("Resolving latest Zenodo release for year ", release_year, "...")
+    record_id <- resolve_zenodo_record(
+      year = release_year,
+      concept_doi = "10.5281/zenodo.18157681"
+    )
+  }
+
+  # Store record ID for downstream use
+  attr(year_dir, "zenodo_record_id") <- record_id
+
+  return(year_dir)
+}
+
+
+### Robust download function using httr
+download_zenodo_file <- function(file_url, file_path, retries = 3, timeout_sec = 300) {
+  for(i in seq_len(retries)) {
+    try({
+      resp <- httr::GET(
+        file_url,
+        httr::write_disk(file_path, overwrite = TRUE),
+        httr::timeout(timeout_sec)
+      )
+      httr::stop_for_status(resp)
+
+      # Verify that file is non-empty
+      if(file.exists(file_path) && file.info(file_path)$size > 0) {
+        return(TRUE)
+      } else stop("Downloaded file is empty.")
+    }, silent = TRUE)
+
+    if(i < retries) message("Retrying download... attempt ", i + 1)
+  }
+  stop("Failed to download ", file_url, " after ", retries, " attempts.")
+}
+
+
+
+
+# print zenodo citation
+print_zenodo_citation <- function(year, zenodo_record_id = NULL, concept_doi = "10.5281/zenodo.18157681") {
+  year <- as.character(year)
+  zenodo_record_id <- zenodo_year_records[[year]]
+
+  if (!is.null(zenodo_record_id)) {
+    message(
+      "Citation for CHR&R data (", year, "):\n",
+      "County Health Rankings & Roadmaps. Zenodo. DOI: https://doi.org/", concept_doi,
+      " (Zenodo record ID: ", zenodo_record_id, ")"
+    )
+  } else {
+    # fallback if the year isn't in the vector
+    message(
+      "Citation for CHR&R data (", year, "):\n",
+      "County Health Rankings & Roadmaps. Zenodo. DOI: https://doi.org/", concept_doi
+    )
+  }
 }
