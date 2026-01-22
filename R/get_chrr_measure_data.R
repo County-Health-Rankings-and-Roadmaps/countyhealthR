@@ -152,13 +152,13 @@ get_chrr_measure_data <- function(geography = c("county", "state", "national"),
 
     # Specify column types for speed
     col_types <- cols(
-      state_fips  = col_character(),
-      county_fips = col_character(),
-      measure_id  = col_integer(),
-     #measure_name= col_character(),
-      year        = col_integer(),
-      raw_value       = col_double(),
-     .default    = col_guess()  # everything else is guessed automatically
+      state_fips  = readr::col_character(),
+      county_fips = readr::col_character(),
+      measure_id  = readr::col_integer(),
+     #measure_name= readr::col_character(),
+      year        = readr::col_integer(),
+      raw_value       = readr::col_double(),
+     .default    = readr::col_guess()  # everything else is guessed automatically
     )
 
     df <- read_csv_zenodo(
