@@ -7,7 +7,8 @@
 get_chrr_measure_data(
   geography = c("county", "state", "national"),
   measure,
-  release_year
+  release_year,
+  refresh = FALSE
 )
 }
 \arguments{
@@ -31,6 +32,9 @@ Use the \code{list_chrr_measures()} function to print all available
 \item{release_year}{A numeric year corresponding to a CHR&R release year folder.
 Must match one of the year-specific subfolders available in the GitHub
 repository.}
+
+\item{refresh}{Logical. If TRUE, forces re-download of data
+even if a cached version is available.}
 }
 \value{
 A tibble containing filtered CHRR data for the requested geography, measure,
@@ -40,15 +44,15 @@ and release year. Typical columns include:
 }
 \description{
 Downloads and filters County Health Rankings & Roadmaps (CHR&R) data directly
-from the measure calculations GitHub repository
-(\url{https://github.com/County-Health-Rankings-and-Roadmaps/chrr_measure_calcs}).
+from the Zenodo archive
+(\url{https://doi.org/10.5281/zenodo.18157681}).
 Users provide the measure ID, geography type, and release year as inputs.
 The function returns data for the specified measure across the specified geography
 for the given release year. It mimics the style and behavior of
 \code{tidycensus::get_decennial()}.
 }
 \details{
-The function first reads the measure-year index (\code{t_measure_years.csv}) to
+The function first reads the measure-year index to
 identify available measures for the specified year, then automatically retrieves
 the correct data file:
 \itemize{

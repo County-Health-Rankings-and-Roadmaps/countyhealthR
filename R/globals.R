@@ -1,0 +1,19 @@
+utils::globalVariables(c(
+  ".",
+  "state_name",
+  "county_fips",
+  "years_used",
+  "raw_value",
+  "ci_low",
+  "ci_high",
+  "numerator",
+  "denominator",
+  "compare_years_text",
+  "compare_states_text",
+  "record_id",
+  "factor_name",
+  "category_name",
+  "focus_area_name",
+  "compare_states",
+  "compare_years"
+))

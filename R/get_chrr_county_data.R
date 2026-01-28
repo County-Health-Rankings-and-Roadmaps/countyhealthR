@@ -1,3 +1,39 @@
+#' Get County-Level County Health Rankings & Roadmaps Data
+#'
+#' Returns all available County Health Rankings & Roadmaps (CHR&R) measure data
+#' for a specified county, state, and release year. The function accepts flexible
+#' state and county inputs and pulls the
+#' corresponding county-level data from the Zenodo repository.
+#'
+#' On successful execution, the function prints the appropriate Zenodo citation
+#' along with the resolved county, state, and release year of the returned data.
+#'
+#' @param state A \code{character} specifying the state. May be a full state name
+#'   (e.g., \code{"Wisconsin"}), postal abbreviation (e.g., \code{"WI"}), or
+#'   two-digit FIPS code (e.g., \code{"55"}).
+#' @param county A \code{character} specifying the county. May be a county name
+#'   (e.g., \code{"Dane"}) or a three-digit county FIPS code (e.g., \code{"025"}).
+#'   County name matching is not case sensitive and ignores common suffixes such as "County,"
+#' "Parish," "City," or "Borough."
+#' @param release_year A \code{numeric} specifying the CHR&R release year to pull
+#'   county-level data. Importantly, this is not the same as the year represented by the data;
+#'   see the \code{years_used} column for the data year(s).
+#' @param refresh A \code{logical} indicating whether to force a fresh download
+#'   from Zenodo even if cached data are available. Defaults to \code{FALSE}.
+#'
+#' @return A tibble containing county-level CHR&R measure values, confidence
+#'   intervals (where available), numerators, denominators, and basic measure
+#'   metadata for the specified county and release year. For more detailed
+#'   metadata, use \code{get_chrr_measure_metadata()}.
+#'
+#' @export
+#'
+#' @examples
+#' \dontrun{
+#' get_chrr_county_data("WI", "dane county", 2024)
+#' get_chrr_county_data("Wisconsin", "025", 2023)
+#' get_chrr_county_data("55", "DANE", 2022)
+#' }
 get_chrr_county_data <- function(state, county, release_year, refresh = FALSE) {
 
   ## ----------------------------
@@ -12,7 +48,7 @@ get_chrr_county_data <- function(state, county, release_year, refresh = FALSE) {
       state        = toupper(trimws(state)),
       state_name   = toupper(trimws(state_name)),
       county       = toupper(trimws(county)) %>%
-        gsub("\\s+(COUNTY|PARISH|CITY|PLANNING REGION|BOROUGH|MUNICIPALITY)$", "", ., ignore.case = TRUE),
+        gsub("\\s+(COUNTY|PARISH|CITY|PLANNING REGION|BOROUGH|MUNICIPALITY|CENSUS AREA)$", "", ., ignore.case = TRUE),
       fipscode     = trimws(fipscode)
     )
 
@@ -38,6 +74,7 @@ get_chrr_county_data <- function(state, county, release_year, refresh = FALSE) {
 
   # unique state FIPS
   state_fips_input <- unique(state_matches$statecode)[1]
+  state_name_resolved = unique(state_matches$state_name)[1]
 
   ## ----------------------------
   ## resolve county
@@ -52,12 +89,15 @@ get_chrr_county_data <- function(state, county, release_year, refresh = FALSE) {
   if (nrow(county_matches) == 0) {
     stop(
       "County not found in ", state, " (FIPS ", state_fips, ").\n",
-      "Valid counties include:\n",
+      "You can specify the county by either its three-digit FIPS code or its name (not case sensitive).\n",
+      "Valid ", state, " counties:\n",
       paste0("  ", state_matches$countycode, " - ", state_matches$county, collapse = "\n")
     )
   }
 
   county_fips_input <- unique(county_matches$countycode)[1]
+  county_name_resolved <- unique(county_matches$county)[1]
+
 
 
   ## ----------------------------
@@ -77,7 +117,42 @@ get_chrr_county_data <- function(state, county, release_year, refresh = FALSE) {
 
   if (inherits(df, "try-error")) stop("Failed to read Zenodo CSV for year ", release_year)
 
-  df %>%
-      filter(state_fips == state_fips_input & county_fips == county_fips_input)
+  countydf = df %>%
+    filter(state_fips == state_fips_input & county_fips == county_fips_input) %>%
+    select(-years_used) #to avoid double when merged with measure_map next
+
+  out = countydf %>% dplyr::left_join(measure_map, by = c("year", "measure_id")) %>%
+    dplyr::rename(release_year = year) %>%
+    dplyr::select(
+      state_fips,
+      county_fips,
+      measure_id,
+      measure_name,
+      description,
+      raw_value,
+      ci_low,
+      ci_high,
+      numerator,
+      denominator,
+      years_used,
+      compare_years_text,
+      compare_states_text
+    )
+  ## ----------------------------
+  ## success messages
+  ## ----------------------------
+
+  message(
+    "Returning CHR&R data for ",
+    county_name_resolved, ", ",
+    state_name_resolved,
+    " (fipscode ", state_fips_input,
+    county_fips_input,
+    ") for release year ", release_year
+  )
+
+
+  return(out)
 
 }
+
