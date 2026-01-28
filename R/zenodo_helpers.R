@@ -31,7 +31,7 @@ resolve_zenodo_record <- function(year, concept_doi = "10.5281/zenodo.18157681")
 
   url <- paste0(
     "https://zenodo.org/api/records?q=",
-    URLencode(query),
+    utils::URLencode(query),
     "&sort=mostrecent"
   )
 
@@ -101,7 +101,7 @@ prepare_zenodo_data <- function(release_year, refresh = FALSE) {
   # Resolve Zenodo record (pinned or evolving)
   record_id <- zenodo_year_records[[release_year]]
 
-  if (is.na(record_id)) {
+  if (is.null(record_id)) {
     message("Resolving latest Zenodo release for year ", release_year, "...")
     record_id <- resolve_zenodo_record(
       year = release_year,
@@ -160,3 +160,77 @@ print_zenodo_citation <- function(year, zenodo_record_id = NULL, concept_doi = "
     )
   }
 }
+
+
+# get county and state names for each look up and printing
+
+get_county_list <- function() {
+  url <- "https://github.com/County-Health-Rankings-and-Roadmaps/chrr_measure_calcs/raw/main/inputs/county_fips.sas7bdat"
+  temp <- tempfile(fileext = ".sas7bdat")
+  utils::download.file(url, temp, mode = "wb")  # wb = write binary
+  counties <- haven::read_sas(temp)
+
+  return(counties)
+}
+
+# add the full state name in
+state_lookup <- data.frame(
+  state = state.abb,
+  state_name = state.name,
+  stringsAsFactors = FALSE
+)
+#need DC too
+state_lookup <- rbind(
+  state_lookup,
+  data.frame(
+    state = "DC",
+    state_name = "Washington, D.C.",
+    stringsAsFactors = FALSE
+  )
+)
+
+county_choices <- get_county_list() %>%
+  dplyr::left_join(state_lookup, by = "state")
+
+########################################################
+# measure map
+
+# load the names datasets that are not year, county, or measure specific (ie these are always loaded)
+
+cat_names <- read_csv_zenodo(file.path("t_category.csv"))
+fac_names <- read_csv_zenodo(file.path("t_factor.csv"))
+foc_names <- read_csv_zenodo(file.path("t_focus_area.csv"))
+mea_years <- read_csv_zenodo(file.path("t_measure_years.csv")) %>% select(year, measure_id, years_used)
+mea_compare <- read_csv_zenodo(file.path("t_measure.csv"))
+# this has JRs comparable codes: compare_states and compare_years
+# where -1 = unknown, 0 = no, 1 = yes, and 2= with caution
+
+
+mea_names = mea_years %>%
+  dplyr::full_join(mea_compare, by = c("measure_id", "year"))
+
+
+# Build the measure mapping
+measure_map <- mea_names %>%
+ # filter(year == y) %>%
+  dplyr::left_join(foc_names, by = c("measure_parent" = "focus_area_id", "year")) %>%
+  dplyr::left_join(fac_names, by = c("focus_area_parent" = "factor_id", "year")) %>%
+  dplyr::left_join(cat_names, by = c("factor_parent" = "category_id", "year")) %>%
+  dplyr::mutate(compare_years_text = dplyr::case_when(
+    compare_years == -1 ~ "Comparability across years is unknown",
+    compare_years ==  0 ~ "Not comparable across years",
+    compare_years ==  1 ~ "Comparable across years",
+    compare_years == 2 ~ "Use caution when comparing across years",
+    TRUE ~ ""
+  ),
+
+  compare_states_text = dplyr::case_when(
+    compare_states == -1 ~ "Comparability across states is unknown",
+    compare_states ==  0 ~ "Not comparable across states",
+    compare_states ==  1 ~ "Comparable across states",
+    compare_states == 2 ~ "Use caution when comparing across states",
+    TRUE ~ ""
+  )) %>%
+  dplyr::select(year, measure_id, measure_name, description, years_used, compare_years_text, compare_states_text, factor_name, category_name)
+
+

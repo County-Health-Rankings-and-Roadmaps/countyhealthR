@@ -30,6 +30,9 @@
 #'   Must match one of the year-specific subfolders available in the GitHub
 #'   repository.
 #'
+#' @param refresh Logical. If TRUE, forces re-download of data
+#'   even if a cached version is available.
+#'
 #' @details
 #' The function first reads the measure-year index to
 #' identify available measures for the specified year, then automatically retrieves

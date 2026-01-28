@@ -4,7 +4,7 @@
 \alias{list_chrr_measures}
 \title{List available CHR&R measures for a given release year}
 \usage{
-list_chrr_measures(release_year = 2023)
+list_chrr_measures(release_year = NULL)
 }
 \arguments{
 \item{release_year}{Numeric year. This corresponds to the year of CHR&R's annual data release.}
