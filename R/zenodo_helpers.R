@@ -101,7 +101,7 @@ prepare_zenodo_data <- function(release_year, refresh = FALSE) {
   # Resolve Zenodo record (pinned or evolving)
   record_id <- zenodo_year_records[[release_year]]
 
-  if (is.na(record_id)) {
+  if (is.null(record_id)) {
     message("Resolving latest Zenodo release for year ", release_year, "...")
     record_id <- resolve_zenodo_record(
       year = release_year,
@@ -160,3 +160,36 @@ print_zenodo_citation <- function(year, zenodo_record_id = NULL, concept_doi = "
     )
   }
 }
+
+
+# get county and state names for each look up and printing
+
+get_county_list <- function() {
+  url <- "https://github.com/County-Health-Rankings-and-Roadmaps/chrr_measure_calcs/raw/main/inputs/county_fips.sas7bdat"
+  temp <- tempfile(fileext = ".sas7bdat")
+  download.file(url, temp, mode = "wb")  # wb = write binary
+  counties <- haven::read_sas(temp)
+
+  return(counties)
+}
+
+# add the full state name in
+state_lookup <- data.frame(
+  state = state.abb,
+  state_name = state.name,
+  stringsAsFactors = FALSE
+)
+#need DC too
+state_lookup <- rbind(
+  state_lookup,
+  data.frame(
+    state = "DC",
+    state_name = "Washington, D.C.",
+    stringsAsFactors = FALSE
+  )
+)
+
+county_choices <- get_county_list() %>%
+  dplyr::left_join(state_lookup, by = "state")
+
+
