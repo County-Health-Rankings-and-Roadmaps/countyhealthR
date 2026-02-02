@@ -1,5 +1,6 @@
 # countyhealthR
 an R package to quickly pull CHR&amp;R data into R, modeled after tidycensus
+
 NOTE: this package is currently under development and has not yet been tested across operating systems. 
 
 Run the following R code to quickly install and load `countyhealthR` into your local environment: 
