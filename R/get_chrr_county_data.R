@@ -41,7 +41,7 @@ get_chrr_county_data <- function(state, county, release_year, refresh = FALSE) {
   ## ----------------------------
 
   # normalize county_choices for matching
-  county_choices_norm <- county_choices %>%
+  county_choices_norm <- get_county_choices() %>%
     dplyr::mutate(
       statecode    = toupper(trimws(statecode)),
       countycode   = toupper(trimws(countycode)),
@@ -121,7 +121,7 @@ get_chrr_county_data <- function(state, county, release_year, refresh = FALSE) {
     filter(state_fips == state_fips_input & county_fips == county_fips_input) %>%
     select(-years_used) #to avoid double when merged with measure_map next
 
-  out = countydf %>% dplyr::left_join(measure_map, by = c("year", "measure_id")) %>%
+  out = countydf %>% dplyr::left_join(get_measure_map(), by = c("year", "measure_id")) %>%
     dplyr::rename(release_year = year) %>%
     dplyr::select(
       state_fips,
