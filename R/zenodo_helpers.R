@@ -46,35 +46,100 @@ resolve_zenodo_record <- function(year, concept_doi = "10.5281/zenodo.18157681")
 }
 
 ### Read CSV from Zenodo (robust)
-read_csv_zenodo <- function(filename, year = NULL, refresh = FALSE) {
-  cache_dir <- file.path(rappdirs::user_cache_dir("countyhealthR_data"), "Cache")
+read_csv_zenodo <- function(
+    filename,
+    year = NULL,
+    refresh = FALSE,
+    required_cols = NULL
+) {
+
+  cache_dir <- file.path(
+    rappdirs::user_cache_dir("countyhealthR_data"),
+    "Cache"
+  )
   dir.create(cache_dir, recursive = TRUE, showWarnings = FALSE)
 
-  if(!is.null(year)) {
+  if (!is.null(year)) {
     year <- as.character(year)
     year_dir <- prepare_zenodo_data(year, refresh)
     record_id <- attr(year_dir, "zenodo_record_id")
     file_path <- file.path(year_dir, filename)
-    file_url <- paste0("https://zenodo.org/records/", record_id, "/files/", filename, "?download=1")
+    file_url <- paste0(
+      "https://zenodo.org/records/",
+      record_id,
+      "/files/",
+      filename,
+      "?download=1"
+    )
 
-    # Print citation
     print_zenodo_citation(year)
 
-    if(!file.exists(file_path) || refresh) {
-      message("Downloading ", filename, " (", year, ") from Zenodo...")
-      download_zenodo_file(file_url, file_path)
-    }
   } else {
     file_path <- file.path(cache_dir, filename)
-    root_url <- paste0("https://zenodo.org/records/18157793/files/", filename, "?download=1")
-    if(!file.exists(file_path) || refresh) {
-      message("Downloading root-level file from Zenodo...")
-      download_zenodo_file(root_url, file_path)
+    file_url <- paste0(
+      "https://zenodo.org/records/18157793/files/",
+      filename,
+      "?download=1"
+    )
+  }
+
+  download_if_needed <- function() {
+    message("Downloading ", filename, " from Zenodo...")
+    download_zenodo_file(file_url, file_path)
+  }
+
+  # Download if missing or refresh requested
+  if (!file.exists(file_path) || refresh) {
+    download_if_needed()
+  }
+
+  # Attempt to read
+  dat <- tryCatch(
+    {
+      readr::read_csv(file_path, show_col_types = FALSE, progress = FALSE)
+    },
+    error = function(e) {
+      message("Failed to read ", filename, ". Removing cached file.")
+      unlink(file_path)
+      stop("Failed to parse ", filename, call. = FALSE)
+    }
+  )
+
+  # 🔍 Validate structure
+  if (!is.null(required_cols)) {
+    missing <- setdiff(required_cols, names(dat))
+    if (length(missing) > 0) {
+      message(
+        "Cached file ", filename,
+        " is invalid (missing columns: ",
+        paste(missing, collapse = ", "),
+        "). Re-downloading."
+      )
+
+      unlink(file_path)
+      download_if_needed()
+
+      dat <- readr::read_csv(
+        file_path,
+        show_col_types = FALSE,
+        progress = FALSE
+      )
+
+      missing <- setdiff(required_cols, names(dat))
+      if (length(missing) > 0) {
+        stop(
+          "Zenodo file ", filename,
+          " does not contain expected columns: ",
+          paste(missing, collapse = ", "),
+          call. = FALSE
+        )
+      }
     }
   }
 
-  readr::read_csv(file_path, show_col_types = FALSE)
+  dat
 }
+
 
 
 ### prepare zenodo data
