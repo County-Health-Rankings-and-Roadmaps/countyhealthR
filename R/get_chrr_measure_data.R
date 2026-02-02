@@ -1,4 +1,4 @@
-#' Retrieve County Health Rankings & Roadmaps measure data from GitHub
+#' Retrieve County Health Rankings & Roadmaps measure data from Zenodo
 #'
 #' @description
 #' Downloads and filters County Health Rankings & Roadmaps (CHR&R) data directly
@@ -27,8 +27,9 @@
 #'   \code{measure_id}s and \code{measure_name}s for a given release year.
 #'
 #' @param release_year A numeric year corresponding to a CHR&R release year folder.
-#'   Must match one of the year-specific subfolders available in the GitHub
-#'   repository.
+#'   Must match one of the year-specific subfolders available in the Zenodo
+#'   repository. Importantly, this is not the same as the year(s) represented by the data;
+#'   see the \code{years_used} column for the data year(s).
 #'
 #' @param refresh Logical. If TRUE, forces re-download of data
 #'   even if a cached version is available.
