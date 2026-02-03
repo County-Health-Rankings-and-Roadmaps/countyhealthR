@@ -143,12 +143,13 @@ get_chrr_county_data <- function(state, county, release_year, refresh = FALSE) {
   ## ----------------------------
 
   message(
-    "Returning CHR&R data for ",
+    "\n\n Returning CHR&R data for ",
     county_name_resolved, ", ",
     state_name_resolved,
     " (fipscode ", state_fips_input,
     county_fips_input,
-    ") for release year ", release_year
+    ") for release year ", release_year, ".\n\n",
+    print_zenodo_citation(release_year)
   )
 
 

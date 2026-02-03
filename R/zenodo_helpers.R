@@ -72,7 +72,6 @@ read_csv_zenodo <- function(
       "?download=1"
     )
 
-    print_zenodo_citation(year)
 
   } else {
     file_path <- file.path(cache_dir, filename)
@@ -263,14 +262,24 @@ get_county_choices <- function(refresh = FALSE) {
 # load the names datasets that are not year, county, or measure specific (ie these are always loaded)
 
 get_measure_map <- function(refresh = FALSE) {
-  cat_names <- read_csv_zenodo("t_category.csv", refresh = refresh)
-  fac_names <- read_csv_zenodo("t_factor.csv", refresh = refresh)
-  foc_names <- read_csv_zenodo("t_focus_area.csv", refresh = refresh)
+  cat_names <- read_csv_zenodo("t_category.csv",
+                               year = max(as.integer(names(zenodo_year_records))),
+                               refresh = refresh)
+  fac_names <- read_csv_zenodo("t_factor.csv",
+                               year = max(as.integer(names(zenodo_year_records))),
+                               refresh = refresh)
+  foc_names <- read_csv_zenodo("t_focus_area.csv",
+                               year = max(as.integer(names(zenodo_year_records))),
+                               refresh = refresh)
 
-  mea_years <- read_csv_zenodo("t_measure_years.csv", refresh = refresh) %>%
+  mea_years <- read_csv_zenodo("t_measure_years.csv",
+                               year = max(as.integer(names(zenodo_year_records))),
+                               refresh = refresh) %>%
     dplyr::select(year, measure_id, years_used)
 
-  mea_compare <- read_csv_zenodo("t_measure.csv", refresh = refresh)
+  mea_compare <- read_csv_zenodo("t_measure.csv",
+                                 year = max(as.integer(names(zenodo_year_records))),
+                                 refresh = refresh)
 
   mea_names <- mea_years %>%
     dplyr::full_join(mea_compare, by = c("measure_id", "year"))
