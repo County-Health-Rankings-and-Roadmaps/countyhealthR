@@ -18,7 +18,7 @@
 #' get_chrr_measure_metadata("High school graduation", 2025)
 #' }
 #' @export
-get_chrr_measure_metadata <- function(measure, release_year = max(as.integer(names(zenodo_year_records)))) {
+get_chrr_measure_metadata <- function(measure, release_year = most_recent) {
 
   message(paste0("Loading CHR&R measure metadata for release year ", release_year))
 

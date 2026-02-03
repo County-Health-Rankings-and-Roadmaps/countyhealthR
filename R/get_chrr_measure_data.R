@@ -88,7 +88,7 @@
 
 get_chrr_measure_data <- function(geography = c("county", "state", "national"),
                           measure,
-                          release_year = max(as.integer(names(zenodo_year_records))),
+                          release_year = most_recent,
                           refresh = FALSE) {
   # Validate geography argument
   #geography <- match.arg(geography)

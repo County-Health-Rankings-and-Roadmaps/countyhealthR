@@ -18,6 +18,7 @@ zenodo_year_records <- c(
   "2025" = "18332002"
 )
 
+most_recent = max(as.integer(names(zenodo_year_records)))
 
 
 ### resolve zenodo record
@@ -263,22 +264,17 @@ get_county_choices <- function(refresh = FALSE) {
 
 get_measure_map <- function(refresh = FALSE) {
   cat_names <- read_csv_zenodo("t_category.csv",
-                               year = max(as.integer(names(zenodo_year_records))),
                                refresh = refresh)
   fac_names <- read_csv_zenodo("t_factor.csv",
-                               year = max(as.integer(names(zenodo_year_records))),
                                refresh = refresh)
   foc_names <- read_csv_zenodo("t_focus_area.csv",
-                               year = max(as.integer(names(zenodo_year_records))),
                                refresh = refresh)
 
   mea_years <- read_csv_zenodo("t_measure_years.csv",
-                               year = max(as.integer(names(zenodo_year_records))),
                                refresh = refresh) %>%
     dplyr::select(year, measure_id, years_used)
 
   mea_compare <- read_csv_zenodo("t_measure.csv",
-                                 year = max(as.integer(names(zenodo_year_records))),
                                  refresh = refresh)
 
   mea_names <- mea_years %>%
