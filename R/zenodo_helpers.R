@@ -48,7 +48,7 @@ resolve_zenodo_record <- function(year, concept_doi = "10.5281/zenodo.18157681")
 ### Read CSV from Zenodo (robust)
 read_csv_zenodo <- function(
     filename,
-    year = NULL,
+    year = max(as.integer(names(zenodo_year_records))),
     refresh = FALSE,
     required_cols = NULL
 ) {
@@ -83,7 +83,7 @@ read_csv_zenodo <- function(
   }
 
   download_if_needed <- function() {
-    message("Downloading ", filename, " from Zenodo...")
+    #message("Downloading ", filename, " from Zenodo...")
     download_zenodo_file(file_url, file_path)
   }
 
@@ -236,7 +236,7 @@ get_county_list <- function(refresh = FALSE) {
 
   if (!file.exists(local_file) || refresh) {
     url <- "https://github.com/County-Health-Rankings-and-Roadmaps/chrr_measure_calcs/raw/main/inputs/county_fips.sas7bdat"
-    message("Downloading county FIPS file...")
+    #message("Downloading county FIPS file...")
     utils::download.file(url, local_file, mode = "wb", quiet = TRUE)
   }
 

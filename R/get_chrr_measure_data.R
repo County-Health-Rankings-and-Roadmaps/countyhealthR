@@ -26,7 +26,10 @@
 #'   Use the \code{list_chrr_measures()} function to print all available
 #'   \code{measure_id}s and \code{measure_name}s for a given release year.
 #'
-#' @param release_year A numeric year corresponding to a CHR&R release year folder.
+#' @param release_year A \code{numeric} specifying the CHR&R release year to pull data.
+#' Returns the most recent release year as default.
+#'   Importantly, this is not the same as the year represented by the data;
+#'   see the \code{years_used} column for the data year(s).
 #'   Must match one of the year-specific subfolders available in the Zenodo
 #'   repository. Importantly, this is not the same as the year(s) represented by the data;
 #'   see the \code{years_used} column for the data year(s).
@@ -85,7 +88,7 @@
 
 get_chrr_measure_data <- function(geography = c("county", "state", "national"),
                           measure,
-                          release_year,
+                          release_year = max(as.integer(names(zenodo_year_records))),
                           refresh = FALSE) {
   # Validate geography argument
   #geography <- match.arg(geography)

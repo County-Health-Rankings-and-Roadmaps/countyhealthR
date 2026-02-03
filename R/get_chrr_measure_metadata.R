@@ -8,7 +8,7 @@
 #' @param measure A \code{character} specifying the measure. Can be either
 #'   a \code{measure_id} or \code{measure_name}.
 #' @param release_year A \code{numeric} specifying the release year for which
-#'   to pull the metadata.
+#'   to pull the metadata. Returns the most recent release year as default.
 #' @return A tibble of measure metadata (invisibly) and prints a readable summary.
 #' @export
 #' @examples
@@ -18,7 +18,7 @@
 #' get_chrr_measure_metadata("High school graduation", 2025)
 #' }
 #' @export
-get_chrr_measure_metadata <- function(measure, release_year) {
+get_chrr_measure_metadata <- function(measure, release_year = max(as.integer(names(zenodo_year_records)))) {
 
   message(paste0("Loading CHR&R measure metadata for release year ", release_year))
 
