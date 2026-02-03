@@ -88,10 +88,11 @@ get_chrr_measure_data <- function(geography = c("county", "state", "national"),
                           release_year,
                           refresh = FALSE) {
   # Validate geography argument
-  geography <- match.arg(geography)
+  #geography <- match.arg(geography)
 
   # --- Load measure-year index (shared file on Zenodo) ---
-  measure_index <- read_csv_zenodo(filename = "t_measure_years.csv")
+  measure_index <- read_csv_zenodo(filename = "t_measure_years.csv",
+                                   year = max(as.integer(names(zenodo_year_records))))
 
   # --- Validate release_year dynamically ---
   valid_years <- unique(measure_index$year)
@@ -104,7 +105,7 @@ get_chrr_measure_data <- function(geography = c("county", "state", "national"),
 
 
   # --- Load measure-year index ---
-  measure_info <- read_csv_zenodo(filename = "t_measure_years.csv") %>%
+  measure_info <- measure_index %>%
     dplyr::filter(year == !!release_year)
 
   # Match the measure
@@ -129,15 +130,14 @@ get_chrr_measure_data <- function(geography = c("county", "state", "national"),
 
   var_id <- var_info$measure_id
 
+  measure_name_resolved = var_info$measure_name
+
   # --- Load the data file depending on geography ---
   file_name <- if (geography == "county") {
     paste0("t_measure_data_years_", release_year, ".csv")
   } else {
     paste0("t_state_data_years_", release_year, ".csv")
   }
-
-  # --- Print Zenodo citation ---
-  print_zenodo_citation(year = release_year, zenodo_record_id = record_id)
 
   # --- Use vroom for large county files, readr for smaller ones ---
   if (geography == "county") {
@@ -196,6 +196,14 @@ get_chrr_measure_data <- function(geography = c("county", "state", "national"),
   if ("year" %in% names(df_out)) {
     df_out <- df_out %>% dplyr::rename(release_year = year)
   }
+
+  message(
+    "\n\n Returning CHR&R data for ",
+    measure_name_resolved, " at the ",
+    geography, "-level for release year ",
+    release_year, ": \n\n",
+    print_zenodo_citation(release_year)
+  )
 
   return(df_out)
 }

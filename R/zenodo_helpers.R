@@ -307,7 +307,7 @@ get_measure_map <- function(refresh = FALSE) {
     dplyr::select(
       year, measure_id, measure_name, description, years_used,
       compare_years_text, compare_states_text,
-      factor_name, category_name
+      factor_name, focus_area_name, category_name
     )
 }
 

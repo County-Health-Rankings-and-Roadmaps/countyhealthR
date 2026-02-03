@@ -15,7 +15,8 @@ list_chrr_measures <- function(release_year = NULL) {
   message("Loading measure metadata from Zenodo...")
 
   df <- read_csv_zenodo(
-    filename = "t_measure_years.csv"
+    filename = "t_measure_years.csv",
+    year = max(as.integer(names(zenodo_year_records)))
   )
 
   # Validate that release_year exists (if provided)
