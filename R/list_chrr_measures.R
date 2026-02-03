@@ -12,7 +12,7 @@
 #' list_chrr_measures(2023)
 #' }
 list_chrr_measures <- function(release_year = NULL) {
-  message("Loading measure metadata from Zenodo...")
+  message(paste0("Loading all CHR&R measures for release year ", release_year))
 
   df <- read_csv_zenodo(
     filename = "t_measure_years.csv",

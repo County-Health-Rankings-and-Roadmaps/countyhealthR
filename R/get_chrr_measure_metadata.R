@@ -20,7 +20,7 @@
 #' @export
 get_chrr_measure_metadata <- function(measure, release_year) {
 
-  message("Loading measure metadata from Zenodo...")
+  message(paste0("Loading CHR&R measure metadata for release year ", release_year))
 
 
   measure_map = get_measure_map()
