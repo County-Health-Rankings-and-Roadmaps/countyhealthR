@@ -8,7 +8,7 @@
 #' @param measure A \code{character} specifying the measure. Can be either
 #'   a \code{measure_id} or \code{measure_name}.
 #' @param release_year A \code{numeric} specifying the release year for which
-#'   to pull the metadata.
+#'   to pull the metadata. Returns the most recent release year as default.
 #' @return A tibble of measure metadata (invisibly) and prints a readable summary.
 #' @export
 #' @examples
@@ -18,20 +18,14 @@
 #' get_chrr_measure_metadata("High school graduation", 2025)
 #' }
 #' @export
-get_chrr_measure_metadata <- function(measure, release_year) {
+get_chrr_measure_metadata <- function(measure, release_year = most_recent) {
 
-  message("Loading measure metadata from Zenodo...")
+  message(paste0("Loading CHR&R measure metadata for release year ", release_year))
 
-  # Load supporting CSVs from Zenodo
-  mea_years   <- read_csv_zenodo(filename = "t_measure_years.csv") %>%
-    dplyr::select(year, measure_id, years_used)
-  mea_compare <- read_csv_zenodo("t_measure.csv")
-  cat_names <- read_csv_zenodo("t_category.csv")
-  fac_names <- read_csv_zenodo("t_factor.csv")
-  foc_names <- read_csv_zenodo("t_focus_area.csv")
 
+  measure_map = get_measure_map()
   # --- Validate release_year dynamically ---
-  valid_years <- unique(mea_years$year)
+  valid_years <- unique(measure_map$year)
   if (!(release_year %in% valid_years)) {
     stop(
       "Invalid release_year: ", release_year, ". ",
@@ -39,40 +33,15 @@ get_chrr_measure_metadata <- function(measure, release_year) {
     )
   }
 
-  # Combine measure metadata
-  mea_names <- mea_years %>%
-    dplyr::full_join(mea_compare, by = c("measure_id", "year"))
 
-  # Filter by release_year
-  metadata <- mea_names %>%
+  metadata = measure_map %>%
     dplyr::filter(year == release_year) %>%
-    dplyr::left_join(foc_names, by = c("measure_parent" = "focus_area_id", "year")) %>%
-    dplyr::left_join(fac_names, by = c("focus_area_parent" = "factor_id", "year")) %>%
-    dplyr::left_join(cat_names, by = c("factor_parent" = "category_id", "year")) %>%
-    dplyr::select(
-      measure_id, measure_name, years_used, factor_name, category_name, focus_area_name,
-      compare_states, compare_years, description
-    ) %>%
     dplyr::filter(measure_id == measure |
                     stringr::str_to_lower(measure_name) == stringr::str_to_lower(measure)
-                  ) %>%
-    dplyr::slice(1) %>%  # in case multiple matches
-    dplyr::mutate(
-      year_comparison_note = dplyr::case_when(
-        compare_years == -1 ~ "With caution",
-        compare_years == 0  ~ "No",
-        compare_years == 1  ~ "Yes",
-        compare_years == 2  ~ "With caution",
-        TRUE ~ ""
-      ),
-      state_comparison_note = dplyr::case_when(
-        compare_states == -1 ~ "With caution",
-        compare_states == 0  ~ "No",
-        compare_states == 1  ~ "Yes",
-        compare_states == 2  ~ "With caution",
-        TRUE ~ ""
-      )
-    )
+    ) %>%
+    dplyr::slice(1)  # in case multiple matches
+
+
 
   # Print nicely
   if (nrow(metadata) == 0) {
@@ -90,8 +59,10 @@ get_chrr_measure_metadata <- function(measure, release_year) {
   cat("Factor Name:      ", metadata$factor_name, "\n")
   cat("Category Name:    ", metadata$category_name, "\n")
   cat("Focus Area Name:  ", metadata$focus_area_name, "\n")
-  cat("Compare across states:", metadata$state_comparison_note, "\n")
-  cat("Compare across years: ", metadata$year_comparison_note, "\n")
+  cat("Compare across states:", metadata$compare_states_text, "\n")
+  cat("Compare across years: ", metadata$compare_years_text, "\n")
 
   invisible(metadata) # still return tibble for programmatic use
+
+  message(print_zenodo_citation(year = release_year))
 }

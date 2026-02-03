@@ -18,6 +18,7 @@ zenodo_year_records <- c(
   "2025" = "18332002"
 )
 
+most_recent = max(as.integer(names(zenodo_year_records)))
 
 
 ### resolve zenodo record
@@ -48,7 +49,7 @@ resolve_zenodo_record <- function(year, concept_doi = "10.5281/zenodo.18157681")
 ### Read CSV from Zenodo (robust)
 read_csv_zenodo <- function(
     filename,
-    year = NULL,
+    year = max(as.integer(names(zenodo_year_records))),
     refresh = FALSE,
     required_cols = NULL
 ) {
@@ -72,7 +73,6 @@ read_csv_zenodo <- function(
       "?download=1"
     )
 
-    print_zenodo_citation(year)
 
   } else {
     file_path <- file.path(cache_dir, filename)
@@ -84,7 +84,7 @@ read_csv_zenodo <- function(
   }
 
   download_if_needed <- function() {
-    message("Downloading ", filename, " from Zenodo...")
+    #message("Downloading ", filename, " from Zenodo...")
     download_zenodo_file(file_url, file_path)
   }
 
@@ -237,7 +237,7 @@ get_county_list <- function(refresh = FALSE) {
 
   if (!file.exists(local_file) || refresh) {
     url <- "https://github.com/County-Health-Rankings-and-Roadmaps/chrr_measure_calcs/raw/main/inputs/county_fips.sas7bdat"
-    message("Downloading county FIPS file...")
+    #message("Downloading county FIPS file...")
     utils::download.file(url, local_file, mode = "wb", quiet = TRUE)
   }
 
@@ -263,14 +263,19 @@ get_county_choices <- function(refresh = FALSE) {
 # load the names datasets that are not year, county, or measure specific (ie these are always loaded)
 
 get_measure_map <- function(refresh = FALSE) {
-  cat_names <- read_csv_zenodo("t_category.csv", refresh = refresh)
-  fac_names <- read_csv_zenodo("t_factor.csv", refresh = refresh)
-  foc_names <- read_csv_zenodo("t_focus_area.csv", refresh = refresh)
+  cat_names <- read_csv_zenodo("t_category.csv",
+                               refresh = refresh)
+  fac_names <- read_csv_zenodo("t_factor.csv",
+                               refresh = refresh)
+  foc_names <- read_csv_zenodo("t_focus_area.csv",
+                               refresh = refresh)
 
-  mea_years <- read_csv_zenodo("t_measure_years.csv", refresh = refresh) %>%
+  mea_years <- read_csv_zenodo("t_measure_years.csv",
+                               refresh = refresh) %>%
     dplyr::select(year, measure_id, years_used)
 
-  mea_compare <- read_csv_zenodo("t_measure.csv", refresh = refresh)
+  mea_compare <- read_csv_zenodo("t_measure.csv",
+                                 refresh = refresh)
 
   mea_names <- mea_years %>%
     dplyr::full_join(mea_compare, by = c("measure_id", "year"))
@@ -298,7 +303,7 @@ get_measure_map <- function(refresh = FALSE) {
     dplyr::select(
       year, measure_id, measure_name, description, years_used,
       compare_years_text, compare_states_text,
-      factor_name, category_name
+      factor_name, focus_area_name, category_name
     )
 }
 
