@@ -8,7 +8,8 @@
 #' @param measure A \code{character} specifying the measure. Can be either
 #'   a \code{measure_id} or \code{measure_name}.
 #' @param release_year A \code{numeric} specifying the release year for which
-#'   to pull the metadata. Returns the most recent release year as default.
+#'   to pull the metadata. Defaults to the most recent release year if
+#'   \code{NULL}.
 #' @return A tibble of measure metadata and prints a readable summary.
 #' @export
 #' @examples

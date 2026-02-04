@@ -27,9 +27,7 @@
 #'   \code{measure_id}s and \code{measure_name}s for a given release year.
 #'
 #' @param release_year A \code{numeric} specifying the CHR&R release year to pull data.
-#' Returns the most recent release year as default.
-#'   Importantly, this is not the same as the year represented by the data;
-#'   see the \code{years_used} column in the output for the data year(s).
+#' Defaults to the most recent release year if \code{NULL}.
 #'
 #' @param refresh Logical. If TRUE, forces re-download of data
 #'   even if a cached version is available.
@@ -211,19 +209,18 @@ get_chrr_measure_data <- function(geography = c("county", "state", "national"),
       dplyr::select(
         state_fips,
         county_fips,
-        measure_id,
         raw_value,
-        ci_low,
-        ci_high,
         numerator,
-        denominator
+        denominator,
+        ci_low,
+        ci_high
       )
   }
 
   message(
-    "\n\n Returning CHR&R data for ",
-    measure_name_resolved, " at the ",
-    geography, "-level for release year ",
+    "\n\nReturning CHR&R data for ",
+    measure_name_resolved, " (measure ID #", var_info$measure_id, ")\n",
+    "at the ", geography, "-level for release year ",
     release_year, " (data years: ",  var_info$years_used, ").", "\n",
     var_info$compare_states_text, ". ",
     var_info$compare_years_text, ".\n\n",

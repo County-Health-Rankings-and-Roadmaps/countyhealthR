@@ -30,9 +30,7 @@ Use the \code{list_chrr_measures()} function to print all available
 \code{measure_id}s and \code{measure_name}s for a given release year.}
 
 \item{release_year}{A \code{numeric} specifying the CHR&R release year to pull data.
-Returns the most recent release year as default.
-Importantly, this is not the same as the year represented by the data;
-see the \code{years_used} column in the output for the data year(s).}
+Defaults to the most recent release year if \code{NULL}.}
 
 \item{refresh}{Logical. If TRUE, forces re-download of data
 even if a cached version is available.}

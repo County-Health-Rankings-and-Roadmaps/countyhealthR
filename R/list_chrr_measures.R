@@ -2,7 +2,8 @@
 #'
 #' Downloads metadata for measures and returns their IDs and names.
 #'
-#' @param release_year Numeric year. This corresponds to the year of CHR&R's annual data release. Defaults to the most recent release year.
+#' @param release_year Numeric year. This corresponds to the year of CHR&R's annual data release.
+#' Defaults to the most recent release year if \code{NULL}.
 #'
 #' @return A tibble with measure_id, measure_name, and description.
 #' @export

@@ -11,7 +11,8 @@ get_chrr_measure_metadata(measure, release_year = NULL)
 a \code{measure_id} or \code{measure_name}.}
 
 \item{release_year}{A \code{numeric} specifying the release year for which
-to pull the metadata. Returns the most recent release year as default.}
+to pull the metadata. Defaults to the most recent release year if
+\code{NULL}.}
 }
 \value{
 A tibble of measure metadata and prints a readable summary.

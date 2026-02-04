@@ -17,9 +17,7 @@ County name matching is not case sensitive and ignores common suffixes such as "
 "Parish," "City," or "Borough."}
 
 \item{release_year}{A \code{numeric} specifying the CHR&R release year to pull
-county-level data. Returns the most recent release year as default.
-Importantly, this is not the same as the year represented by the data;
-see the \code{years_used} column of the output for the data year(s).}
+county-level data. Defaults to the most recent release year if \code{NULL}.}
 
 \item{refresh}{A \code{logical} indicating whether to force a fresh download
 from Zenodo even if cached data are available. Defaults to \code{FALSE}.}
