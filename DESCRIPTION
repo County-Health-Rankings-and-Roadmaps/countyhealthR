@@ -24,13 +24,12 @@ Imports:
     stringr,
     jsonlite,
     rappdirs,
-    glue
+    curl
 Suggests:
     testthat,
     knitr,
     rmarkdown,
-    covr,
-    vdiffr
+    covr
 VignetteBuilder: knitr
 Depends: 
     R (>= 3.5)

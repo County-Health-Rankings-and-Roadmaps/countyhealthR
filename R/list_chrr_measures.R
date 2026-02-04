@@ -12,6 +12,8 @@
 #' list_chrr_measures(2023)
 #' }
 list_chrr_measures <- function(release_year = NULL) {
+
+  .check_internet()
   # Compute most recent year dynamically
   most_recent <- max(as.integer(names(zenodo_year_records)))
 

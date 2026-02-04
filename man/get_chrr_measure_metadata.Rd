@@ -4,17 +4,17 @@
 \alias{get_chrr_measure_metadata}
 \title{Get Metadata for a County Health Rankings & Roadmaps measure of health}
 \usage{
-get_chrr_measure_metadata(measure, release_year)
+get_chrr_measure_metadata(measure, release_year = NULL)
 }
 \arguments{
 \item{measure}{A \code{character} specifying the measure. Can be either
 a \code{measure_id} or \code{measure_name}.}
 
 \item{release_year}{A \code{numeric} specifying the release year for which
-to pull the metadata.}
+to pull the metadata. Returns the most recent release year as default.}
 }
 \value{
-A tibble of measure metadata (invisibly) and prints a readable summary.
+A tibble of measure metadata and prints a readable summary.
 }
 \description{
 Returns key information about a County Health Rankings & Roadmaps measure,

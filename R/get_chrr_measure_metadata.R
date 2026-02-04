@@ -20,7 +20,8 @@
 #' @export
 get_chrr_measure_metadata <- function(measure, release_year = NULL) {
 
-    # Compute most recent year dynamically
+  .check_internet()
+  # Compute most recent year dynamically
     most_recent <- max(as.integer(names(zenodo_year_records)))
 
     # If user didn’t specify, use most recent

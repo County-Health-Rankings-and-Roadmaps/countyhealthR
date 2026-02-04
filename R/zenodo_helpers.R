@@ -20,6 +20,17 @@ zenodo_year_records <- c(
 
 most_recent = max(as.integer(names(zenodo_year_records)))
 
+.check_internet <- function() {
+  if (!curl::has_internet()) {
+    stop(
+      "No internet connection detected. ",
+      "countyhealthR requires an active connection to Zenodo.",
+      call. = FALSE
+    )
+  }
+}
+
+
 
 ### resolve zenodo record
 resolve_zenodo_record <- function(year, concept_doi = "10.5281/zenodo.18157681") {

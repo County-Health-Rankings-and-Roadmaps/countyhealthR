@@ -7,7 +7,7 @@
 list_chrr_measures(release_year = NULL)
 }
 \arguments{
-\item{release_year}{Numeric year. This corresponds to the year of CHR&R's annual data release.}
+\item{release_year}{Numeric year. This corresponds to the year of CHR&R's annual data release. Defaults to the most recent release year.}
 }
 \value{
 A tibble with measure_id, measure_name, and description.

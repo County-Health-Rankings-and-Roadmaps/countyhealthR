@@ -2,12 +2,12 @@
 % Please edit documentation in R/get_chrr_measure_data.R
 \name{get_chrr_measure_data}
 \alias{get_chrr_measure_data}
-\title{Retrieve County Health Rankings & Roadmaps measure data from GitHub}
+\title{Retrieve County Health Rankings & Roadmaps measure data from Zenodo}
 \usage{
 get_chrr_measure_data(
   geography = c("county", "state", "national"),
   measure,
-  release_year,
+  release_year = NULL,
   refresh = FALSE
 )
 }
@@ -29,9 +29,10 @@ Options are:
 Use the \code{list_chrr_measures()} function to print all available
 \code{measure_id}s and \code{measure_name}s for a given release year.}
 
-\item{release_year}{A numeric year corresponding to a CHR&R release year folder.
-Must match one of the year-specific subfolders available in the GitHub
-repository.}
+\item{release_year}{A \code{numeric} specifying the CHR&R release year to pull data.
+Returns the most recent release year as default.
+Importantly, this is not the same as the year represented by the data;
+see the \code{years_used} column in the output for the data year(s).}
 
 \item{refresh}{Logical. If TRUE, forces re-download of data
 even if a cached version is available.}

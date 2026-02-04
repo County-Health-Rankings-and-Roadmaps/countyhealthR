@@ -4,7 +4,7 @@
 \alias{get_chrr_county_data}
 \title{Get County-Level County Health Rankings & Roadmaps Data}
 \usage{
-get_chrr_county_data(state, county, release_year, refresh = FALSE)
+get_chrr_county_data(state, county, release_year = NULL, refresh = FALSE)
 }
 \arguments{
 \item{state}{A \code{character} specifying the state. May be a full state name
@@ -17,8 +17,9 @@ County name matching is not case sensitive and ignores common suffixes such as "
 "Parish," "City," or "Borough."}
 
 \item{release_year}{A \code{numeric} specifying the CHR&R release year to pull
-county-level data. Importantly, this is not the same as the year represented by the data;
-see the \code{years_used} column for the data year(s).}
+county-level data. Returns the most recent release year as default.
+Importantly, this is not the same as the year represented by the data;
+see the \code{years_used} column of the output for the data year(s).}
 
 \item{refresh}{A \code{logical} indicating whether to force a fresh download
 from Zenodo even if cached data are available. Defaults to \code{FALSE}.}

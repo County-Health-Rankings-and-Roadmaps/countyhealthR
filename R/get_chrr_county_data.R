@@ -18,7 +18,7 @@
 #' @param release_year A \code{numeric} specifying the CHR&R release year to pull
 #'   county-level data. Returns the most recent release year as default.
 #'   Importantly, this is not the same as the year represented by the data;
-#'   see the \code{years_used} column for the data year(s).
+#'   see the \code{years_used} column of the output for the data year(s).
 #' @param refresh A \code{logical} indicating whether to force a fresh download
 #'   from Zenodo even if cached data are available. Defaults to \code{FALSE}.
 #'
@@ -39,6 +39,8 @@ get_chrr_county_data <- function(state,
                                  county,
                                  release_year = NULL,
                                  refresh = FALSE) {
+
+  .check_internet()
 
   # Compute most recent year dynamically
   most_recent <- max(as.integer(names(zenodo_year_records)))
