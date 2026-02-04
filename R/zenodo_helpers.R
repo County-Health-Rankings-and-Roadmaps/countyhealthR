@@ -299,10 +299,10 @@ get_measure_map <- function(refresh = FALSE) {
     dplyr::left_join(cat_names, by = c("factor_parent" = "category_id", "year")) %>%
     dplyr::mutate(
       compare_years_text = dplyr::case_when(
-        compare_years == -1 ~ "Comparability across years is unknown",
-        compare_years ==  0 ~ "Not comparable across years",
-        compare_years ==  1 ~ "Comparable across years",
-        compare_years ==  2 ~ "Use caution when comparing across years",
+        compare_years == -1 ~ "Comparability across release years is unknown",
+        compare_years ==  0 ~ "Not comparable across release years",
+        compare_years ==  1 ~ "Comparable across release years",
+        compare_years ==  2 ~ "Use caution when comparing across release years",
         TRUE ~ ""
       ),
       compare_states_text = dplyr::case_when(

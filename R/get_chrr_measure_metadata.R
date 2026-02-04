@@ -69,7 +69,7 @@ get_chrr_measure_metadata <- function(measure, release_year = NULL) {
   cat("Category Name:    ", metadata$category_name, "\n")
   cat("Focus Area Name:  ", metadata$focus_area_name, "\n")
   cat("Compare across states:", metadata$compare_states_text, "\n")
-  cat("Compare across years: ", metadata$compare_years_text, "\n")
+  cat("Compare across release years: ", metadata$compare_years_text, "\n")
 
   message(print_zenodo_citation(year = release_year))
 
