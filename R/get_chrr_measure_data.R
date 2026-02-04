@@ -206,7 +206,7 @@ get_chrr_measure_data <- function(geography = c("county", "state", "national"),
 
   # --- Rename year column to release_year ---
   if ("year" %in% names(df_out)) {
-    df_temp <- df_out %>%
+    df_out <- df_out %>%
       dplyr::rename(release_year = year) %>%
       dplyr::select(
         state_fips,
