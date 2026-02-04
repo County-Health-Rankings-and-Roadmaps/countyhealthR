@@ -1,29 +1,135 @@
 # tests/testthat/test-downloads.R
 
-test_that("CHR&R data downloads successfully from Zenodo", {
-  skip_on_cran()  # Skip this test on CRAN
-  skip_if_offline(host = "zenodo.org")  # Skip if no internet connection
+library(testthat)
 
-  # Try downloading a small test file (e.g. measure metadata)
-  expect_no_error({
-    meta <- countyhealthR::get_chrr_measure_metadata(measure = 11, release_year = 2021)
-  })
+context("CHR&R data downloads and internal references")
 
-  expect_true(nrow(meta) > 0)
-  expect_true("measure_name" %in% names(meta))
+# Skip on CRAN and offline
+skip_if_offline <- function(host = "zenodo.org") {
+  if (inherits(try(curl::nslookup(host), silent = TRUE), "try-error")) {
+    skip(paste("Offline or cannot reach", host))
+  }
+}
+
+# ---------------------------------------------
+# Internal county list
+# ---------------------------------------------
+test_that("internal county list loads correctly", {
+  x <- countyhealthR:::.get_county_list_internal()
+
+  expect_true(is.data.frame(x))
+  expect_gt(nrow(x), 3000)
+  expect_named(x, c("statecode", "countycode", "state", "county", "fipscode"))
 })
 
-test_that("get_chrr_measure_data returns data for a known measure and year", {
-  skip_on_cran()
-  skip_if_offline(host = "zenodo.org")
 
-  df <- countyhealthR::get_chrr_measure_data(
-    geography = "state",
-    measure = 9,  # Example measure ID
-    release_year = 2022
+# ---------------------------------------------
+# get_chrr_county_data
+# ---------------------------------------------
+test_that("get_chrr_county_data works for multiple input types", {
+  skip_on_cran()
+  skip_if_offline()
+
+  examples <- list(
+    list("WI", "dane county", 2024),
+    list("Wisconsin", "025", 2023),
+    list("55", "DANE", 2022),
+    list("wi", "Dane ")
   )
 
-  expect_s3_class(df, "data.frame")
-  expect_true(nrow(df) > 0)
-  expect_true(all(c("statecode", "value") %in% names(df)))
+  for (ex in examples) {
+    if (length(ex) == 3) {
+      df <- countyhealthR::get_chrr_county_data(ex[[1]], ex[[2]], ex[[3]])
+    } else {
+      df <- countyhealthR::get_chrr_county_data(ex[[1]], ex[[2]])  # release_year defaults inside
+    }
+    expect_s3_class(df, "data.frame")
+    expect_gt(nrow(df), 0)
+    expect_true(all(c("state_fips", "county_fips", "measure_name") %in% names(df)))
+  }
+})
+
+# ---------------------------------------------
+# get_chrr_measure_data
+# ---------------------------------------------
+test_that("get_chrr_measure_data returns valid data for different geographies", {
+  skip_on_cran()
+  skip_if_offline()
+
+  # County-level
+  county_data <- countyhealthR::get_chrr_measure_data(
+    geography = "county",
+    measure = 21,
+    release_year = 2023
+  )
+  expect_s3_class(county_data, "data.frame")
+  expect_gt(nrow(county_data), 0)
+  expect_true("county_fips" %in% names(county_data))
+
+  # State-level
+  state_data <- countyhealthR::get_chrr_measure_data(
+    geography = "state",
+    measure = "insufficient sleep",
+    release_year = 2022
+  )
+  expect_s3_class(state_data, "data.frame")
+  expect_gt(nrow(state_data), 0)
+  expect_true("state_fips" %in% names(state_data))
+
+  # National-level
+  nat_data <- countyhealthR::get_chrr_measure_data(
+    geography = "national",
+    measure = "uninsured",
+    release_year = 2024
+  )
+  expect_s3_class(nat_data, "data.frame")
+  expect_gt(nrow(nat_data), 0)
+  expect_true("raw_value" %in% names(nat_data))
+
+  # Verify that default release_year is working
+  default_releaseyr <- countyhealthR::get_chrr_measure_data(
+    geography = "national",
+    measure = "unemployment"
+  )
+  expect_s3_class(default_releaseyr, "data.frame")
+  expect_gt(nrow(default_releaseyr), 0)
+  expect_true("raw_value" %in% names(default_releaseyr))
+})
+
+# ---------------------------------------------
+# get_chrr_measure_metadata
+# ---------------------------------------------
+test_that("get_chrr_measure_metadata returns metadata correctly", {
+  skip_on_cran()
+  skip_if_offline()
+
+  meta1 <- countyhealthR::get_chrr_measure_metadata(21, 2024)
+  meta2 <- countyhealthR::get_chrr_measure_metadata("Uninsured adults", 2022)
+  meta3 <- countyhealthR::get_chrr_measure_metadata("High school graduation", 2025)
+  meta4 <- countyhealthR::get_chrr_measure_metadata("social associations")
+
+
+  for (meta in list(meta1, meta2, meta3, meta4)) {
+    expect_s3_class(meta, "data.frame")
+    expect_gt(nrow(meta), 0)
+    expect_true("measure_name" %in% names(meta))
+  }
+})
+
+# ---------------------------------------------
+# list_chrr_measures
+# ---------------------------------------------
+test_that("list_chrr_measures lists available measures", {
+  skip_on_cran()
+  skip_if_offline()
+
+  measures1 <- countyhealthR::list_chrr_measures(2023)
+  measures2 <- countyhealthR::list_chrr_measures(release_year = "2019")
+  measures3 <- countyhealthR::list_chrr_measures()
+
+  for (msr in list(measures1, measures2, measures3)) {
+    expect_s3_class(msr, "data.frame")
+    expect_gt(nrow(msr), 0)
+    expect_true(all(c("measure_id", "measure_name") %in% names(msr)))
+  }
 })

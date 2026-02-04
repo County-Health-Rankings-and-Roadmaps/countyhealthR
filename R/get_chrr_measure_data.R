@@ -88,10 +88,17 @@
 
 get_chrr_measure_data <- function(geography = c("county", "state", "national"),
                           measure,
-                          release_year = most_recent,
+                          release_year = NULL,
                           refresh = FALSE) {
   # Validate geography argument
   #geography <- match.arg(geography)
+  # Compute most recent year dynamically
+  most_recent <- max(as.integer(names(zenodo_year_records)))
+
+  # If user didn’t specify, use most recent
+  if (is.null(release_year)) {
+    release_year <- most_recent
+  }
 
   # --- Load measure-year index (shared file on Zenodo) ---
   measure_index <- read_csv_zenodo(filename = "t_measure_years.csv",

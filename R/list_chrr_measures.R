@@ -11,7 +11,15 @@
 #' \dontrun{
 #' list_chrr_measures(2023)
 #' }
-list_chrr_measures <- function(release_year = most_recent) {
+list_chrr_measures <- function(release_year = NULL) {
+  # Compute most recent year dynamically
+  most_recent <- max(as.integer(names(zenodo_year_records)))
+
+  # If user didn’t specify, use most recent
+  if (is.null(release_year)) {
+    release_year <- most_recent
+  }
+
   message(paste0("Loading all CHR&R measures for release year ", release_year))
 
   df <- read_csv_zenodo(

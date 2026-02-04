@@ -37,8 +37,16 @@
 #' }
 get_chrr_county_data <- function(state,
                                  county,
-                                 release_year = most_recent,
+                                 release_year = NULL,
                                  refresh = FALSE) {
+
+  # Compute most recent year dynamically
+  most_recent <- max(as.integer(names(zenodo_year_records)))
+
+  # If user didn’t specify, use most recent
+  if (is.null(release_year)) {
+    release_year <- most_recent
+  }
 
   ## ----------------------------
   ## normalize inputs using county_choices
