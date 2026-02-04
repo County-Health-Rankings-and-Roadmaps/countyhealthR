@@ -20,6 +20,17 @@ zenodo_year_records <- c(
 
 most_recent = max(as.integer(names(zenodo_year_records)))
 
+.check_internet <- function() {
+  if (!curl::has_internet()) {
+    stop(
+      "No internet connection detected. ",
+      "countyhealthR requires an active connection to Zenodo.",
+      call. = FALSE
+    )
+  }
+}
+
+
 
 ### resolve zenodo record
 resolve_zenodo_record <- function(year, concept_doi = "10.5281/zenodo.18157681") {
@@ -227,32 +238,34 @@ print_zenodo_citation <- function(year, zenodo_record_id = NULL, concept_doi = "
 }
 
 
-# get county and state names for each look up and printing
+# load county and state names for each look up and printing
 
-get_county_list <- function(refresh = FALSE) {
-  data_dir <- tools::R_user_dir("countyhealthR", which = "data")
-  dir.create(data_dir, recursive = TRUE, showWarnings = FALSE)
+.get_county_list_internal <- function() {
+  path <- system.file("extdata", "county_list.rds", package = "countyhealthR")
 
-  local_file <- file.path(data_dir, "county_fips.sas7bdat")
-
-  if (!file.exists(local_file) || refresh) {
-    url <- "https://github.com/County-Health-Rankings-and-Roadmaps/chrr_measure_calcs/raw/main/inputs/county_fips.sas7bdat"
-    #message("Downloading county FIPS file...")
-    utils::download.file(url, local_file, mode = "wb", quiet = TRUE)
+  if (path == "") {
+    stop(
+      "Internal county list not found. ",
+      "This likely indicates a corrupted package installation.",
+      call. = FALSE
+    )
   }
 
-  haven::read_sas(local_file)
+  readRDS(path)
 }
 
 
-get_county_choices <- function(refresh = FALSE) {
+
+
+
+get_county_choices <- function() {
   state_lookup <- data.frame(
     state = c(state.abb, "DC"),
     state_name = c(state.name, "Washington, D.C."),
     stringsAsFactors = FALSE
   )
 
-  get_county_list(refresh) %>%
+  .get_county_list_internal() %>%
     dplyr::left_join(state_lookup, by = "state")
 }
 
@@ -286,10 +299,10 @@ get_measure_map <- function(refresh = FALSE) {
     dplyr::left_join(cat_names, by = c("factor_parent" = "category_id", "year")) %>%
     dplyr::mutate(
       compare_years_text = dplyr::case_when(
-        compare_years == -1 ~ "Comparability across years is unknown",
-        compare_years ==  0 ~ "Not comparable across years",
-        compare_years ==  1 ~ "Comparable across years",
-        compare_years ==  2 ~ "Use caution when comparing across years",
+        compare_years == -1 ~ "Comparability across release years is unknown",
+        compare_years ==  0 ~ "Not comparable across release years",
+        compare_years ==  1 ~ "Comparable across release years",
+        compare_years ==  2 ~ "Use caution when comparing across release years",
         TRUE ~ ""
       ),
       compare_states_text = dplyr::case_when(

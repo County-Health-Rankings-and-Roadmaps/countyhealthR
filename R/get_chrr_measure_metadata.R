@@ -8,8 +8,9 @@
 #' @param measure A \code{character} specifying the measure. Can be either
 #'   a \code{measure_id} or \code{measure_name}.
 #' @param release_year A \code{numeric} specifying the release year for which
-#'   to pull the metadata. Returns the most recent release year as default.
-#' @return A tibble of measure metadata (invisibly) and prints a readable summary.
+#'   to pull the metadata. Defaults to the most recent release year if
+#'   \code{NULL}.
+#' @return A tibble of measure metadata and prints a readable summary.
 #' @export
 #' @examples
 #' \dontrun{
@@ -18,7 +19,16 @@
 #' get_chrr_measure_metadata("High school graduation", 2025)
 #' }
 #' @export
-get_chrr_measure_metadata <- function(measure, release_year = most_recent) {
+get_chrr_measure_metadata <- function(measure, release_year = NULL) {
+
+  .check_internet()
+  # Compute most recent year dynamically
+    most_recent <- max(as.integer(names(zenodo_year_records)))
+
+    # If user didn’t specify, use most recent
+    if (is.null(release_year)) {
+      release_year <- most_recent
+    }
 
   message(paste0("Loading CHR&R measure metadata for release year ", release_year))
 
@@ -49,7 +59,7 @@ get_chrr_measure_metadata <- function(measure, release_year = most_recent) {
       "No metadata found for the measure: ", measure, ". ",
       "Use list_chrr_measures(release_year = ", release_year, ") to see available measure_ids and measure_names for ", release_year, "."
     )
-    return(invisible(NULL))
+    return(dplyr::tibble())  # return empty tibble instead of NULL
   }
 
   cat("\nMeasure ID:       ", metadata$measure_id, "\n")
@@ -60,9 +70,11 @@ get_chrr_measure_metadata <- function(measure, release_year = most_recent) {
   cat("Category Name:    ", metadata$category_name, "\n")
   cat("Focus Area Name:  ", metadata$focus_area_name, "\n")
   cat("Compare across states:", metadata$compare_states_text, "\n")
-  cat("Compare across years: ", metadata$compare_years_text, "\n")
-
-  invisible(metadata) # still return tibble for programmatic use
+  cat("Compare across release years: ", metadata$compare_years_text, "\n")
 
   message(print_zenodo_citation(year = release_year))
+
+  # Return metadata as tibble but don't print it
+  invisible(metadata)
+
 }

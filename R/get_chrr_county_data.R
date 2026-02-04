@@ -16,9 +16,7 @@
 #'   County name matching is not case sensitive and ignores common suffixes such as "County,"
 #' "Parish," "City," or "Borough."
 #' @param release_year A \code{numeric} specifying the CHR&R release year to pull
-#'   county-level data. Returns the most recent release year as default.
-#'   Importantly, this is not the same as the year represented by the data;
-#'   see the \code{years_used} column for the data year(s).
+#'   county-level data. Defaults to the most recent release year if \code{NULL}.
 #' @param refresh A \code{logical} indicating whether to force a fresh download
 #'   from Zenodo even if cached data are available. Defaults to \code{FALSE}.
 #'
@@ -37,8 +35,18 @@
 #' }
 get_chrr_county_data <- function(state,
                                  county,
-                                 release_year = most_recent,
+                                 release_year = NULL,
                                  refresh = FALSE) {
+
+  .check_internet()
+
+  # Compute most recent year dynamically
+  most_recent <- max(as.integer(names(zenodo_year_records)))
+
+  # If user didn’t specify, use most recent
+  if (is.null(release_year)) {
+    release_year <- most_recent
+  }
 
   ## ----------------------------
   ## normalize inputs using county_choices
@@ -92,7 +100,7 @@ get_chrr_county_data <- function(state,
 
   if (nrow(county_matches) == 0) {
     stop(
-      "County not found in ", state, " (FIPS ", state_fips, ").\n",
+      "County not found in ", state, " (FIPS ", state_fips_input, ").\n",
       "You can specify the county by either its three-digit FIPS code or its name (not case sensitive).\n",
       "Valid ", state, " counties:\n",
       paste0("  ", state_matches$countycode, " - ", state_matches$county, collapse = "\n")

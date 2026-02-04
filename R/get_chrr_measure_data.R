@@ -27,12 +27,7 @@
 #'   \code{measure_id}s and \code{measure_name}s for a given release year.
 #'
 #' @param release_year A \code{numeric} specifying the CHR&R release year to pull data.
-#' Returns the most recent release year as default.
-#'   Importantly, this is not the same as the year represented by the data;
-#'   see the \code{years_used} column for the data year(s).
-#'   Must match one of the year-specific subfolders available in the Zenodo
-#'   repository. Importantly, this is not the same as the year(s) represented by the data;
-#'   see the \code{years_used} column for the data year(s).
+#' Defaults to the most recent release year if \code{NULL}.
 #'
 #' @param refresh Logical. If TRUE, forces re-download of data
 #'   even if a cached version is available.
@@ -94,14 +89,23 @@
 
 get_chrr_measure_data <- function(geography = c("county", "state", "national"),
                           measure,
-                          release_year = most_recent,
+                          release_year = NULL,
                           refresh = FALSE) {
   # Validate geography argument
   #geography <- match.arg(geography)
 
+  .check_internet()
+
+  # Compute most recent year dynamically
+  most_recent <- max(as.integer(names(zenodo_year_records)))
+
+  # If user didn’t specify, use most recent
+  if (is.null(release_year)) {
+    release_year <- most_recent
+  }
+
   # --- Load measure-year index (shared file on Zenodo) ---
-  measure_index <- read_csv_zenodo(filename = "t_measure_years.csv",
-                                   year = max(as.integer(names(zenodo_year_records))))
+  measure_index <- get_measure_map()
 
   # --- Validate release_year dynamically ---
   valid_years <- unique(measure_index$year)
@@ -140,6 +144,7 @@ get_chrr_measure_data <- function(geography = c("county", "state", "national"),
   var_id <- var_info$measure_id
 
   measure_name_resolved = var_info$measure_name
+
 
   # --- Load the data file depending on geography ---
   file_name <- if (geography == "county") {
@@ -201,16 +206,30 @@ get_chrr_measure_data <- function(geography = c("county", "state", "national"),
     df_out <- df_out %>% filter(state_fips != "00")
   }
 
+  data_years = measure_info %>% filter(measure_name == measure_name_resolved) %>% select(years_used)
+
   # --- Rename year column to release_year ---
   if ("year" %in% names(df_out)) {
-    df_out <- df_out %>% dplyr::rename(release_year = year)
+    df_out <- df_out %>%
+      dplyr::rename(release_year = year) %>%
+      dplyr::select(
+        state_fips,
+        county_fips,
+        raw_value,
+        numerator,
+        denominator,
+        ci_low,
+        ci_high
+      )
   }
 
   message(
-    "\n\n Returning CHR&R data for ",
-    measure_name_resolved, " at the ",
-    geography, "-level for release year ",
-    release_year, ": \n\n",
+    "\n\nReturning CHR&R data for ",
+    measure_name_resolved, " (measure ID #", var_info$measure_id, ")\n",
+    "at the ", geography, "-level for release year ",
+    release_year, " (data years: ",  var_info$years_used, ").", "\n",
+    var_info$compare_states_text, ". ",
+    var_info$compare_years_text, ".\n\n",
     print_zenodo_citation(release_year)
   )
 
