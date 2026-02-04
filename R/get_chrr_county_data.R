@@ -100,7 +100,7 @@ get_chrr_county_data <- function(state,
 
   if (nrow(county_matches) == 0) {
     stop(
-      "County not found in ", state, " (FIPS ", state_fips, ").\n",
+      "County not found in ", state, " (FIPS ", state_fips_input, ").\n",
       "You can specify the county by either its three-digit FIPS code or its name (not case sensitive).\n",
       "Valid ", state, " counties:\n",
       paste0("  ", state_matches$countycode, " - ", state_matches$county, collapse = "\n")
