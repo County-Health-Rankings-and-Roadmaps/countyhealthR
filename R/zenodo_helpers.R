@@ -227,32 +227,34 @@ print_zenodo_citation <- function(year, zenodo_record_id = NULL, concept_doi = "
 }
 
 
-# get county and state names for each look up and printing
+# load county and state names for each look up and printing
 
-get_county_list <- function(refresh = FALSE) {
-  data_dir <- tools::R_user_dir("countyhealthR", which = "data")
-  dir.create(data_dir, recursive = TRUE, showWarnings = FALSE)
+.get_county_list_internal <- function() {
+  path <- system.file("extdata", "county_list.rds", package = "countyhealthR")
 
-  local_file <- file.path(data_dir, "county_fips.sas7bdat")
-
-  if (!file.exists(local_file) || refresh) {
-    url <- "https://github.com/County-Health-Rankings-and-Roadmaps/chrr_measure_calcs/raw/main/inputs/county_fips.sas7bdat"
-    #message("Downloading county FIPS file...")
-    utils::download.file(url, local_file, mode = "wb", quiet = TRUE)
+  if (path == "") {
+    stop(
+      "Internal county list not found. ",
+      "This likely indicates a corrupted package installation.",
+      call. = FALSE
+    )
   }
 
-  haven::read_sas(local_file)
+  readRDS(path)
 }
 
 
-get_county_choices <- function(refresh = FALSE) {
+
+
+
+get_county_choices <- function() {
   state_lookup <- data.frame(
     state = c(state.abb, "DC"),
     state_name = c(state.name, "Washington, D.C."),
     stringsAsFactors = FALSE
   )
 
-  get_county_list(refresh) %>%
+  .get_county_list_internal() %>%
     dplyr::left_join(state_lookup, by = "state")
 }
 
