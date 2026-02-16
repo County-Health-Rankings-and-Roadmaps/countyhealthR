@@ -3,3 +3,5 @@
 ^\.github$
 ^doc$
 ^Meta$
+^LICENSE\.md$
+^CRAN-SUBMISSION$

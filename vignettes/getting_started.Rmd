@@ -14,6 +14,51 @@ knitr::opts_chunk$set(
 )
 ```
 
-```{r setup}
+```{r eval = FALSE}
 library(countyhealthR)
+```
+
+# --- 1. Explore available measures ---
+# See all County Health Rankings & Roadmaps measures for a given release year
+
+```{r eval = FALSE}
+list_chrr_measures(release_year = 2024)  # useful for discovering measure IDs or names
+```
+
+# --- 2. Pull county-level data ---
+# Examine ALL health measures for a specified location 
+# Example: county-level data for Dane County, Wisconsin
+```{r eval = FALSE}
+county_data <- get_chrr_county_data(
+  state = "WI", 
+  county = "Dane", 
+  release_year = 2025
+)
+head(county_data)
+```
+
+
+# --- 3. Pull measure-level data ---
+# Examine one health measure across a specified geographic unit
+# Example: "Uninsured adults" across all US counties
+```{r eval = FALSE}
+measure_data <- get_chrr_measure_data(
+  geography = "county", 
+  measure = "uninsured adults",
+  release_year = 2022
+)
+head(measure_data)
+```
+
+
+
+# --- 4. Get metadata for a measure ---
+# See details about a measure including description, precision, and years represented
+```{r eval = FALSE}
+meta_data <- get_chrr_measure_metadata(
+  measure = "Uninsured adults", 
+  release_year = 2024
+)
+head(meta_data)
+
 ```

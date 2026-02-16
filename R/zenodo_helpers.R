@@ -285,7 +285,7 @@ get_measure_map <- function(refresh = FALSE) {
 
   mea_years <- read_csv_zenodo("t_measure_years.csv",
                                refresh = refresh) %>%
-    dplyr::select(year, measure_id, years_used)
+    dplyr::select(.data$year, .data$measure_id, .data$years_used)
 
   mea_compare <- read_csv_zenodo("t_measure.csv",
                                  refresh = refresh)
@@ -314,10 +314,10 @@ get_measure_map <- function(refresh = FALSE) {
       )
     ) %>%
     dplyr::select(
-      year, measure_id, measure_name, description, years_used,
-      compare_years_text, compare_states_text,
-      factor_name, focus_area_name, category_name,
-      direction, display_precision, format_type
+      .data$year, .data$measure_id, .data$measure_name, .data$description, .data$years_used,
+      .data$compare_years_text, .data$compare_states_text,
+      .data$factor_name, .data$focus_area_name, .data$category_name,
+      .data$direction, .data$display_precision, .data$format_type
     )
 }
 

@@ -44,6 +44,7 @@
 #' md$direction
 #' md$compare_states_text
 #' }
+#' @importFrom rlang .data
 
 get_chrr_measure_metadata <- function(measure, release_year = NULL) {
 

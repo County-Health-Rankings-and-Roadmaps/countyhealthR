@@ -136,18 +136,18 @@ get_chrr_county_data <- function(state,
       dplyr::left_join(get_measure_map(), by = c("year", "measure_id")) %>%
       dplyr::rename(release_year = year) %>%
       dplyr::select(
-        state_fips,
-        measure_id,
-        measure_name,
-        description,
-        raw_value,
-        ci_low,
-        ci_high,
-        numerator,
-        denominator,
-        years_used,
-        compare_years_text,
-        compare_states_text
+        .data$state_fips,
+        .data$measure_id,
+        .data$measure_name,
+        .data$description,
+        .data$raw_value,
+        .data$ci_low,
+        .data$ci_high,
+        .data$numerator,
+        .data$denominator,
+        .data$years_used,
+        .data$compare_years_text,
+        .data$compare_states_text
       )
 
     message(
@@ -206,25 +206,25 @@ get_chrr_county_data <- function(state,
   if (inherits(df, "try-error")) stop("Failed to read Zenodo CSV for year ", release_year)
 
   countydf = df %>%
-    filter(state_fips == state_fips_input & county_fips == county_fips_input) %>%
-    select(-years_used) #to avoid double when merged with measure_map next
+    dplyr::filter(state_fips == state_fips_input & county_fips == county_fips_input) %>%
+    dplyr::select(-years_used) #to avoid double when merged with measure_map next
 
   out = countydf %>% dplyr::left_join(get_measure_map(), by = c("year", "measure_id")) %>%
     dplyr::rename(release_year = year) %>%
     dplyr::select(
-      state_fips,
-      county_fips,
-      measure_id,
-      measure_name,
-      description,
-      raw_value,
-      ci_low,
-      ci_high,
-      numerator,
-      denominator,
-      years_used,
-      compare_years_text,
-      compare_states_text
+      .data$state_fips,
+      .data$county_fips,
+      .data$measure_id,
+      .data$measure_name,
+      .data$description,
+      .data$raw_value,
+      .data$ci_low,
+      .data$ci_high,
+      .data$numerator,
+      .data$denominator,
+      .data$years_used,
+      .data$compare_years_text,
+      .data$compare_states_text
     )
   ## ----------------------------
   ## success messages
