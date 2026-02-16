@@ -1,24 +1,50 @@
-#' Get Metadata for a County Health Rankings & Roadmaps measure of health
+#' Get Metadata for a County Health Rankings & Roadmaps Measure
 #'
 #' Returns key information about a County Health Rankings & Roadmaps measure,
-#' including measure ID, measure name, description, years used, factor name,
-#' category name, focus area, and whether the measure is comparable across
-#' states and years.
+#' including measure ID, name, description, years used, factor, category, focus area,
+#' and comparability information. This function now also silently returns additional
+#' fields such as `display_precision`, `format_type`, and `direction`,
+#' which may be useful for formatting or analysis.
 #'
 #' @param measure A \code{character} specifying the measure. Can be either
 #'   a \code{measure_id} or \code{measure_name}.
 #' @param release_year A \code{numeric} specifying the release year for which
 #'   to pull the metadata. Defaults to the most recent release year if
 #'   \code{NULL}.
-#' @return A tibble of measure metadata and prints a readable summary.
+#' @return A tibble of measure metadata. Key fields are printed as a summary,
+#'   but additional fields for formatting and comparability are returned silently.
+#'   Returned tibble columns include:
+#'   \itemize{
+#'     \item \code{year} – Release year
+#'     \item \code{measure_id} – Unique measure identifier
+#'     \item \code{measure_name} – Name of the measure
+#'     \item \code{description} – Measure description
+#'     \item \code{years_used} – Years for which the measure is reported
+#'     \item \code{factor_name}, \code{category_name}, \code{focus_area_name} – Measure hierarchy
+#'     \item \code{direction} – Score orientation: 1 means higher values are worse, -1 means higher values are better
+#'     \item \code{display_precision} – Recommended number of decimal places for display
+#'     \item \code{format_type} – Suggested format type:
+#'       \itemize{
+#'         \item 0 = rate
+#'         \item 1 = percentage
+#'         \item 2 = dollars
+#'         \item 3 = ratio
+#'         \item 4–9 = internal program-specific codes
+#'       }
+#'     \item \code{compare_states_text} – User-friendly text about comparability across states
+#'     \item \code{compare_years_text} – User-friendly text about comparability across years
+#'   }
 #' @export
 #' @examples
 #' \dontrun{
-#' get_chrr_measure_metadata(21, 2024)
-#' get_chrr_measure_metadata("Uninsured adults", 2022)
-#' get_chrr_measure_metadata("High school graduation", 2025)
+#' # Return metadata (silent fields included)
+#' md <- get_chrr_measure_metadata(21, 2024)
+#' md$display_precision
+#' md$format_type
+#' md$direction
+#' md$compare_states_text
 #' }
-#' @export
+
 get_chrr_measure_metadata <- function(measure, release_year = NULL) {
 
   .check_internet()

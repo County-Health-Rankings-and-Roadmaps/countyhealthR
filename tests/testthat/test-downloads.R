@@ -31,21 +31,32 @@ test_that("get_chrr_county_data works for multiple input types", {
   skip_if_offline()
 
   examples <- list(
-    list("WI", "dane county", 2024),
-    list("Wisconsin", "025", 2023),
-    list("55", "DANE", 2022),
-    list("wi", "Dane ")
+    list(state = "WI", county = "dane county", release_year = 2024),
+    list(state = "Wisconsin", county = "025", release_year = 2023),
+    list(state = "55", county = "DANE", release_year = 2022),
+    list(state = "wi", county = "Dane "),                 # release_year missing
+    list(state = "WI", county = NULL, release_year = 2024),
+    list(state = "Wisconsin", county = "000", release_year = 2023),
+    list(state = "55", release_year = 2018),               # county missing
+    list(state = "WI")                                     # both county & year missing
   )
 
   for (ex in examples) {
-    if (length(ex) == 3) {
-      df <- countyhealthR::get_chrr_county_data(ex[[1]], ex[[2]], ex[[3]])
-    } else {
-      df <- countyhealthR::get_chrr_county_data(ex[[1]], ex[[2]])  # release_year defaults inside
-    }
+
+    df <- do.call(countyhealthR::get_chrr_county_data, ex)
+
     expect_s3_class(df, "data.frame")
     expect_gt(nrow(df), 0)
-    expect_true(all(c("state_fips", "county_fips", "measure_name") %in% names(df)))
+
+    # state_fips and measure_name should always exist
+    expect_true(all(c("state_fips", "measure_name") %in% names(df)))
+
+    # county_fips should only exist for county-level requests
+    if (!is.null(ex$county) &&
+        !is.na(ex$county) &&
+        toupper(ex$county) != "000") {
+      expect_true("county_fips" %in% names(df))
+    }
   }
 })
 
