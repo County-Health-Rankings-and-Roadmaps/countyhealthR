@@ -4,7 +4,12 @@
 \alias{get_chrr_county_data}
 \title{Get County-Level County Health Rankings & Roadmaps Data}
 \usage{
-get_chrr_county_data(state, county, release_year = NULL, refresh = FALSE)
+get_chrr_county_data(
+  state,
+  county = NULL,
+  release_year = NULL,
+  refresh = FALSE
+)
 }
 \arguments{
 \item{state}{A \code{character} specifying the state. May be a full state name
@@ -13,8 +18,9 @@ two-digit FIPS code (e.g., \code{"55"}).}
 
 \item{county}{A \code{character} specifying the county. May be a county name
 (e.g., \code{"Dane"}) or a three-digit county FIPS code (e.g., \code{"025"}).
-County name matching is not case sensitive and ignores common suffixes such as "County,"
-"Parish," "City," or "Borough."}
+County name matching is not case sensitive and ignores common suffixes such
+as "County," "Parish," "City," or "Borough." If missing, \code{NA}, or
+\code{"000"}, state-level data will be returned.}
 
 \item{release_year}{A \code{numeric} specifying the CHR&R release year to pull
 county-level data. Defaults to the most recent release year if \code{NULL}.}
@@ -30,18 +36,27 @@ metadata, use \code{get_chrr_measure_metadata()}.
 }
 \description{
 Returns all available County Health Rankings & Roadmaps (CHR&R) measure data
-for a specified county, state, and release year. The function accepts flexible
+for a specified state, county (optional) and release year. The function accepts flexible
 state and county inputs and pulls the
-corresponding county-level data from the Zenodo repository.
+corresponding data from the Zenodo repository.
 }
 \details{
+If a county is specified, county-level data are returned. If the \code{county}
+argument is missing, \code{NA}, or \code{"000"} (the FIPS code
+representing state-level values), state-level data are returned instead.
+
 On successful execution, the function prints the appropriate Zenodo citation
-along with the resolved county, state, and release year of the returned data.
+along with all available health measure data for the specified geography and release year.
 }
 \examples{
 \dontrun{
+# County-level examples
 get_chrr_county_data("WI", "dane county", 2024)
-get_chrr_county_data("Wisconsin", "025", 2023)
+get_chrr_county_data("Wisconsin", "025")
 get_chrr_county_data("55", "DANE", 2022)
+
+# State-level examples
+get_chrr_county_data("WI", county = NULL, 2024)
+get_chrr_county_data("Wisconsin", county = "000", 2023)
 }
 }
