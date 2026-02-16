@@ -3,7 +3,7 @@
 #' @description
 #' Downloads and filters County Health Rankings & Roadmaps (CHR&R) data directly
 #' from the Zenodo archive
-#' (<https://doi.org/10.5281/zenodo.18157681>).
+#' (\doi{10.5281/zenodo.18157681}).
 #' Users provide the measure ID, geography type, and release year as inputs.
 #' The function returns data for the specified measure across the specified geography
 #' for the given release year. It mimics the style and behavior of
@@ -117,10 +117,10 @@ get_chrr_measure_data <- function(geography = c("county", "state", "national"),
 
   # Match the measure
   if (is.numeric(measure)) {
-    var_info <- measure_info %>% filter(measure_id == measure)
+    var_info <- measure_info %>% dplyr::filter(measure_id == measure)
   } else {
     var_info <- measure_info %>%
-      filter(str_detect(str_to_lower(measure_name), str_to_lower(measure)))
+      dplyr::filter(str_detect(str_to_lower(measure_name), str_to_lower(measure)))
   }
 
   if (nrow(var_info) == 0) {
@@ -200,20 +200,22 @@ get_chrr_measure_data <- function(geography = c("county", "state", "national"),
     df_out <- df_out %>% filter(state_fips != "00")
   }
 
-  data_years = measure_info %>% filter(measure_name == measure_name_resolved) %>% select(years_used)
+  data_years = measure_info %>%
+    dplyr::filter(measure_name == measure_name_resolved) %>%
+    dplyr::select(.data$years_used)
 
   # --- Rename year column to release_year ---
   if ("year" %in% names(df_out)) {
     df_out <- df_out %>%
       dplyr::rename(release_year = year) %>%
       dplyr::select(
-        state_fips,
-        county_fips,
-        raw_value,
-        numerator,
-        denominator,
-        ci_low,
-        ci_high
+        .data$state_fips,
+        .data$county_fips,
+        .data$raw_value,
+        .data$numerator,
+        .data$denominator,
+        .data$ci_low,
+        .data$ci_high
       )
   }
 

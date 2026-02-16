@@ -9,9 +9,9 @@ Authors@R:
 Maintainer: Hannah Olson-Williams <hannaheow@gmail.com>
 Description: Provides a simple interface to pull County Health Rankings & Roadmaps
   (CHR&R) county-level health data and metadata directly from Zenodo. Users can retrieve
-  data for CHR&R release years 2010 through 2025. The
-  package enables programmatic access similar to tidycensus.
-License: file LICENSE
+  data for CHR&R release years 2010 through 2025. CHR&R data support research and decision-making 
+  to promote health equity and policies that help all communities thrive.   
+License: GPL (>= 3)
 Encoding: UTF-8
 Roxygen: list(markdown = TRUE)
 RoxygenNote: 7.3.3
@@ -24,7 +24,8 @@ Imports:
     stringr,
     jsonlite,
     rappdirs,
-    curl
+    curl,
+    rlang
 Suggests:
     testthat,
     knitr,

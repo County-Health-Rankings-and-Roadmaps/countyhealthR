@@ -44,5 +44,5 @@ list_chrr_measures <- function(release_year = NULL) {
   }
 
   df %>%
-    dplyr::select(measure_id, measure_name, description)
+    dplyr::select(.data$measure_id, .data$measure_name, .data$description)
 }
