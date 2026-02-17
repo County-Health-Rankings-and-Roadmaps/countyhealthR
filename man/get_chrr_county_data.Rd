@@ -26,7 +26,7 @@ as "County," "Parish," "City," or "Borough." If missing, \code{NA}, or
 county-level data. Defaults to the most recent release year if \code{NULL}.}
 
 \item{refresh}{A \code{logical} indicating whether to force a fresh download
-from Zenodo even if cached data are available. Defaults to \code{FALSE}.}
+from 'Zenodo' even if cached data are available. Defaults to \code{FALSE}.}
 }
 \value{
 A tibble containing county-level CHR&R measure values, confidence
@@ -38,14 +38,14 @@ metadata, use \code{get_chrr_measure_metadata()}.
 Returns all available County Health Rankings & Roadmaps (CHR&R) measure data
 for a specified state, county (optional) and release year. The function accepts flexible
 state and county inputs and pulls the
-corresponding data from the Zenodo repository.
+corresponding data from the 'Zenodo' repository.
 }
 \details{
 If a county is specified, county-level data are returned. If the \code{county}
 argument is missing, \code{NA}, or \code{"000"} (the FIPS code
 representing state-level values), state-level data are returned instead.
 
-On successful execution, the function prints the appropriate Zenodo citation
+On successful execution, the function prints the appropriate 'Zenodo' citation
 along with all available health measure data for the specified geography and release year.
 }
 \examples{

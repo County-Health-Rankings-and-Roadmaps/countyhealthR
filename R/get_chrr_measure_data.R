@@ -1,8 +1,8 @@
-#' Retrieve County Health Rankings & Roadmaps measure data from Zenodo
+#' Retrieve County Health Rankings & Roadmaps measure data from 'Zenodo'
 #'
 #' @description
 #' Downloads and filters County Health Rankings & Roadmaps (CHR&R) data directly
-#' from the Zenodo archive
+#' from the 'Zenodo' archive
 #' (\doi{10.5281/zenodo.18157681}).
 #' Users provide the measure ID, geography type, and release year as inputs.
 #' The function returns data for the specified measure across the specified geography
