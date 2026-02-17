@@ -2,7 +2,7 @@
 % Please edit documentation in R/get_chrr_measure_data.R
 \name{get_chrr_measure_data}
 \alias{get_chrr_measure_data}
-\title{Retrieve County Health Rankings & Roadmaps measure data from Zenodo}
+\title{Retrieve County Health Rankings & Roadmaps measure data from 'Zenodo'}
 \usage{
 get_chrr_measure_data(
   geography = c("county", "state", "national"),
@@ -43,8 +43,8 @@ and release year. Typical columns include:
 }
 \description{
 Downloads and filters County Health Rankings & Roadmaps (CHR&R) data directly
-from the Zenodo archive
-(\url{https://doi.org/10.5281/zenodo.18157681}).
+from the 'Zenodo' archive
+(\doi{10.5281/zenodo.18157681}).
 Users provide the measure ID, geography type, and release year as inputs.
 The function returns data for the specified measure across the specified geography
 for the given release year. It mimics the style and behavior of

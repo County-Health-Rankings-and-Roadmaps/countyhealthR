@@ -3,13 +3,13 @@
 #' Returns all available County Health Rankings & Roadmaps (CHR&R) measure data
 #' for a specified state, county (optional) and release year. The function accepts flexible
 #' state and county inputs and pulls the
-#' corresponding data from the Zenodo repository.
+#' corresponding data from the 'Zenodo' repository.
 #'
 #' If a county is specified, county-level data are returned. If the \code{county}
 #' argument is missing, \code{NA}, or \code{"000"} (the FIPS code
 #' representing state-level values), state-level data are returned instead.
 #'
-#' On successful execution, the function prints the appropriate Zenodo citation
+#' On successful execution, the function prints the appropriate 'Zenodo' citation
 #' along with all available health measure data for the specified geography and release year.
 #'
 #' @param state A \code{character} specifying the state. May be a full state name
@@ -23,7 +23,7 @@
 #' @param release_year A \code{numeric} specifying the CHR&R release year to pull
 #'   county-level data. Defaults to the most recent release year if \code{NULL}.
 #' @param refresh A \code{logical} indicating whether to force a fresh download
-#'   from Zenodo even if cached data are available. Defaults to \code{FALSE}.
+#'   from 'Zenodo' even if cached data are available. Defaults to \code{FALSE}.
 #'
 #' @return A tibble containing county-level CHR&R measure values, confidence
 #'   intervals (where available), numerators, denominators, and basic measure
