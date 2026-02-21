@@ -21,7 +21,7 @@ specified release year and the following columns:
 }
 }
 \description{
-Downloads metadata for measures and returns their identifiers,
+Downloads metadata for a release year and returns measure identifiers,
 names, and descriptions.
 }
 \examples{

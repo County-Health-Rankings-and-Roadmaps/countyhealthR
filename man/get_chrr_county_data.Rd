@@ -13,26 +13,25 @@ get_chrr_county_data(
 )
 }
 \arguments{
-\item{state}{A \code{character} specifying the state. May be a full
+\item{state}{\code{Character}. Specifies the state. May be a full
 state name (e.g., \code{"Wisconsin"}), postal abbreviation
 (e.g., \code{"WI"}), or two-digit FIPS code (e.g., \code{"55"}).}
 
-\item{county}{A \code{character} specifying the county. May be a
+\item{county}{\code{Character}. Specifies the county. May be a
 county name (e.g., \code{"Dane"}) or a three-digit county FIPS
 code (e.g., \code{"025"}). Matching is not case sensitive and
 ignores common suffixes such as "County," "Parish," "City,"
 "Borough," or similar. If missing, \code{NA}, or \code{"000"},
 state-level data are returned.}
 
-\item{release_year}{A \code{numeric} specifying the CHR&R release
-year. Defaults to the most recent available release year if
-\code{NULL}.}
+\item{release_year}{\code{Numeric}. Specifies the CHR&R release
+year. Defaults to the most recent available release year.}
 
-\item{refresh}{A \code{logical} indicating whether to force a fresh
+\item{refresh}{\code{Logical}. Indicates whether to force a fresh
 download from Zenodo even if cached data are available.
 Defaults to \code{FALSE}.}
 
-\item{citation}{Logical. If \code{TRUE} (default), prints the
+\item{citation}{\code{Logical}. If \code{TRUE} (default), prints the
 appropriate Zenodo DOI for the requested release year which is useful for citation.
 Set to \code{FALSE} to suppress DOI output.}
 }
@@ -75,9 +74,6 @@ values and associated metadata.
 If a county is specified, county-level data are returned. If the
 \code{county} argument is missing, \code{NA}, or \code{"000"},
 state-level data are returned instead.
-
-Optionally prints the appropriate Zenodo citation for the
-requested release year.
 }
 \examples{
 \donttest{

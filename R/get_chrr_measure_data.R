@@ -26,15 +26,19 @@
 #'   Use the \code{list_chrr_measures()} function to print all available
 #'   \code{measure_id}s and \code{measure_name}s for a given release year.
 #'
-#' @param release_year A \code{numeric} specifying the CHR&R release year to pull data.
-#' Defaults to the most recent release year if \code{NULL}.
+#' @param release_year \code{Numeric}. Specifies the CHR&R release year to pull data.
+#' Defaults to the most recent release year.
 #'
-#' @param refresh Logical. If TRUE, forces re-download of data
-#'   even if a cached version is available.
+#' @param refresh \code{Logical}. If \code{TRUE}, forces re-download of data
+#'   even if a cached version is available. Defaults to \code{FALSE}.
 #'
-#' @param citation Logical. If \code{TRUE} (default), prints the
+#' @param citation \code{Logical}. If \code{TRUE} (default), prints the
 #'   appropriate Zenodo DOI for the requested release year which is useful for citation.
 #'   Set to \code{FALSE} to suppress DOI output.
+#'
+#' @param verbose \code{Logical}. If \code{TRUE} (default), additional information about the
+#'   selected measure is displayed including the measure name and selected metadata fields.
+#'   Set to \code{FALSE} to return only the requested \code{data.frame}.
 #'
 #' @return
 #' A tibble (class \code{tbl_df}, \code{tbl}, \code{data.frame})
@@ -93,7 +97,8 @@ get_chrr_measure_data <- function(geography = c("county", "state", "national"),
                           measure,
                           release_year = NULL,
                           refresh = FALSE,
-                          citation = TRUE) {
+                          citation = TRUE,
+                          verbose = TRUE) {
   # Validate geography argument
   #geography <- match.arg(geography)
 
@@ -230,6 +235,18 @@ get_chrr_measure_data <- function(geography = c("county", "state", "national"),
 
   if (isTRUE(citation)) {
     print_zenodo_citation(release_year)
+  }
+
+  if (isTRUE(verbose)) {
+    message(
+      "\n\nReturning CHR&R data for ",
+      measure_name_resolved, " (measure ID #", var_info$measure_id, ")\n",
+      "at the ", geography, "-level for release year ",
+      release_year, " (data years: ",  var_info$years_used, ").", "\n",
+      var_info$compare_states_text, ". ",
+      var_info$compare_years_text, ".\n\n",
+      print_zenodo_citation(release_year)
+    )
   }
 
   return(df_out)
