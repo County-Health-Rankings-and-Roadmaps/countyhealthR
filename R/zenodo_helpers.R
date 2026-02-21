@@ -95,7 +95,6 @@ read_csv_zenodo <- function(
   }
 
   download_if_needed <- function() {
-    #message("Downloading ", filename, " from Zenodo...")
     download_zenodo_file(file_url, file_path)
   }
 
@@ -285,7 +284,7 @@ get_measure_map <- function(refresh = FALSE) {
 
   mea_years <- read_csv_zenodo("t_measure_years.csv",
                                refresh = refresh) %>%
-    dplyr::select(.data$year, .data$measure_id, .data$years_used)
+    dplyr::select(year, measure_id, years_used)
 
   mea_compare <- read_csv_zenodo("t_measure.csv",
                                  refresh = refresh)

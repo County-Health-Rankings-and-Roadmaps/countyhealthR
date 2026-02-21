@@ -1,16 +1,27 @@
 #' List available CHR&R measures for a given release year
 #'
-#' Downloads metadata for measures and returns their IDs and names.
+#' Downloads metadata for measures and returns their identifiers,
+#' names, and descriptions.
 #'
-#' @param release_year Numeric year. This corresponds to the year of CHR&R's annual data release.
-#' Defaults to the most recent release year if \code{NULL}.
+#' @param release_year Numeric year corresponding to the year of
+#' CHR&R's annual data release. Defaults to the most recent release
+#' year if \code{NULL}.
 #'
-#' @return A tibble with measure_id, measure_name, and description.
+#' @return
+#' A tibble (class \code{tbl_df}) with one row per measure for the
+#' specified release year and the following columns:
+#' \describe{
+#'   \item{measure_id}{Numeric. Unique identifier for the measure.}
+#'   \item{measure_name}{Character. Name of the measure.}
+#'   \item{description}{Character. Brief description of the measure.}
+#' }
+#'
 #' @export
 #'
 #' @examples
-#' \dontrun{
-#' list_chrr_measures(2023)
+#' \donttest{
+#' measures <- list_chrr_measures(2023)
+#' head(measures)
 #' }
 list_chrr_measures <- function(release_year = NULL) {
 
@@ -22,8 +33,6 @@ list_chrr_measures <- function(release_year = NULL) {
   if (is.null(release_year)) {
     release_year <- most_recent
   }
-
-  message(paste0("Loading all CHR&R measures for release year ", release_year))
 
   df <- read_csv_zenodo(
     filename = "t_measure_years.csv",
@@ -44,5 +53,5 @@ list_chrr_measures <- function(release_year = NULL) {
   }
 
   df %>%
-    dplyr::select(.data$measure_id, .data$measure_name, .data$description)
+    dplyr::select(measure_id, measure_name, description)
 }

@@ -1,3 +1,8 @@
+#' @importFrom dplyr filter mutate select arrange slice
+#' @importFrom stringr str_detect str_to_lower
+#' @importFrom rlang .data
+#' @importFrom magrittr %>%
+
 utils::globalVariables(c(".env", "county", "countycode", "description",
                          "fipscode", "measure_id", "measure_name",
                          "state.abb", "state.name", "state_fips",

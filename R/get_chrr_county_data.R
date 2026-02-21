@@ -1,52 +1,82 @@
 #' Get County-Level County Health Rankings & Roadmaps Data
 #'
-#' Returns all available County Health Rankings & Roadmaps (CHR&R) measure data
-#' for a specified state, county (optional) and release year. The function accepts flexible
-#' state and county inputs and pulls the
-#' corresponding data from the 'Zenodo' repository.
+#' Returns County Health Rankings & Roadmaps (CHR&R) measure data
+#' for a specified state and (optionally) county and release year.
+#' Data are retrieved from the Zenodo repository and include measure
+#' values and associated metadata.
 #'
-#' If a county is specified, county-level data are returned. If the \code{county}
-#' argument is missing, \code{NA}, or \code{"000"} (the FIPS code
-#' representing state-level values), state-level data are returned instead.
+#' If a county is specified, county-level data are returned. If the
+#' \code{county} argument is missing, \code{NA}, or \code{"000"},
+#' state-level data are returned instead.
 #'
-#' On successful execution, the function prints the appropriate 'Zenodo' citation
-#' along with all available health measure data for the specified geography and release year.
+#' Optionally prints the appropriate Zenodo citation for the
+#' requested release year.
 #'
-#' @param state A \code{character} specifying the state. May be a full state name
-#'   (e.g., \code{"Wisconsin"}), postal abbreviation (e.g., \code{"WI"}), or
-#'   two-digit FIPS code (e.g., \code{"55"}).
-#' @param county A \code{character} specifying the county. May be a county name
-#'   (e.g., \code{"Dane"}) or a three-digit county FIPS code (e.g., \code{"025"}).
-#'   County name matching is not case sensitive and ignores common suffixes such
-#'   as "County," "Parish," "City," or "Borough." If missing, \code{NA}, or
-#'   \code{"000"}, state-level data will be returned.
-#' @param release_year A \code{numeric} specifying the CHR&R release year to pull
-#'   county-level data. Defaults to the most recent release year if \code{NULL}.
-#' @param refresh A \code{logical} indicating whether to force a fresh download
-#'   from 'Zenodo' even if cached data are available. Defaults to \code{FALSE}.
+#' @param state A \code{character} specifying the state. May be a full
+#'   state name (e.g., \code{"Wisconsin"}), postal abbreviation
+#'   (e.g., \code{"WI"}), or two-digit FIPS code (e.g., \code{"55"}).
+#' @param county A \code{character} specifying the county. May be a
+#'   county name (e.g., \code{"Dane"}) or a three-digit county FIPS
+#'   code (e.g., \code{"025"}). Matching is not case sensitive and
+#'   ignores common suffixes such as "County," "Parish," "City,"
+#'   "Borough," or similar. If missing, \code{NA}, or \code{"000"},
+#'   state-level data are returned.
+#' @param release_year A \code{numeric} specifying the CHR&R release
+#'   year. Defaults to the most recent available release year if
+#'   \code{NULL}.
+#' @param refresh A \code{logical} indicating whether to force a fresh
+#'   download from Zenodo even if cached data are available.
+#'   Defaults to \code{FALSE}.
+#' @param citation Logical. If \code{TRUE} (default), prints the
+#'   appropriate Zenodo DOI for the requested release year which is useful for citation.
+#'   Set to \code{FALSE} to suppress DOI output.
 #'
-#' @return A tibble containing county-level CHR&R measure values, confidence
-#'   intervals (where available), numerators, denominators, and basic measure
-#'   metadata for the specified county and release year. For more detailed
-#'   metadata, use \code{get_chrr_measure_metadata()}.
+#' @return
+#' A tibble (class \code{tbl_df}, \code{tbl}, \code{data.frame})
+#' containing CHR&R measure values for the specified geography
+#' and release year.
+#'
+#' For county-level requests, the tibble includes one row per
+#' measure for the specified county and contains the following columns:
+#' \describe{
+#'   \item{state_fips}{Character. Two-digit state FIPS code.}
+#'   \item{county_fips}{Character. Three-digit county FIPS code.}
+#'   \item{measure_id}{Character. Unique CHR&R measure identifier.}
+#'   \item{measure_name}{Character. Measure name.}
+#'   \item{description}{Character. Brief measure description.}
+#'   \item{raw_value}{Numeric. Reported measure value.}
+#'   \item{ci_low}{Numeric. Lower bound of confidence interval, if available.}
+#'   \item{ci_high}{Numeric. Upper bound of confidence interval, if available.}
+#'   \item{numerator}{Numeric. Measure numerator, if available.}
+#'   \item{denominator}{Numeric. Measure denominator, if available.}
+#'   \item{years_used}{Character. Years used in calculation of the measure.}
+#'   \item{compare_years_text}{Character. Text describing temporal comparison.}
+#'   \item{compare_states_text}{Character. Text describing state comparison.}
+#' }
+#'
+#' For state-level requests, the structure is identical except that
+#' \code{county_fips} is not included.
+#'
+#' The returned tibble represents the full set of CHR&R measures
+#' available for the specified geography and release year.
 #'
 #' @export
 #'
 #' @examples
-#' \dontrun{
-#' # County-level examples
-#' get_chrr_county_data("WI", "dane county", 2024)
-#' get_chrr_county_data("Wisconsin", "025")
-#' get_chrr_county_data("55", "DANE", 2022)
+#' \donttest{
+#' # County-level example
+#' dane <- get_chrr_county_data("WI", "Dane", 2024)
+#' head(dane)
 #'
-#' # State-level examples
-#' get_chrr_county_data("WI", county = NULL, 2024)
-#' get_chrr_county_data("Wisconsin", county = "000", 2023)
+#' # State-level example
+#' wi <- get_chrr_county_data("WI", county = NULL, 2024)
+#' head(wi)
 #' }
 get_chrr_county_data <- function(state,
                                  county = NULL,
                                  release_year = NULL,
-                                 refresh = FALSE) {
+                                 refresh = FALSE,
+                                 citation = TRUE) {
 
   .check_internet()
 
@@ -150,13 +180,9 @@ get_chrr_county_data <- function(state,
         .data$compare_states_text
       )
 
-    message(
-      "\n\n Returning CHR&R STATE-LEVEL data for ",
-      state_name_resolved,
-      " (fipscode ", state_fips_input,
-      ") for release year ", release_year, ".\n\n",
-      print_zenodo_citation(release_year)
-    )
+    if (isTRUE(citation)) {
+      message(print_zenodo_citation(release_year))
+    }
 
     return(out)
   }
@@ -226,19 +252,10 @@ get_chrr_county_data <- function(state,
       .data$compare_years_text,
       .data$compare_states_text
     )
-  ## ----------------------------
-  ## success messages
-  ## ----------------------------
 
-  message(
-    "\n\n Returning CHR&R data for ",
-    county_name_resolved, ", ",
-    state_name_resolved,
-    " (fipscode ", state_fips_input,
-    county_fips_input,
-    ") for release year ", release_year, ".\n\n",
-    print_zenodo_citation(release_year)
-  )
+  if (isTRUE(citation)) {
+    message(print_zenodo_citation(release_year))
+  }
 
 
   return(out)
