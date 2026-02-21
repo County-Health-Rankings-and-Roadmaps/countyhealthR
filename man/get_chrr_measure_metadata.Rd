@@ -15,40 +15,42 @@ to pull the metadata. Defaults to the most recent release year if
 \code{NULL}.}
 }
 \value{
-A tibble of measure metadata. Key fields are printed as a summary,
-but additional fields for formatting and comparability are returned silently.
-Returned tibble columns include:
-\itemize{
-\item \code{year} – Release year
-\item \code{measure_id} – Unique measure identifier
-\item \code{measure_name} – Name of the measure
-\item \code{description} – Measure description
-\item \code{years_used} – Years for which the measure is reported
-\item \code{factor_name}, \code{category_name}, \code{focus_area_name} – Measure hierarchy
-\item \code{direction} – Score orientation: 1 means higher values are worse, -1 means higher values are better
-\item \code{display_precision} – Recommended number of decimal places for display
-\item \code{format_type} – Suggested format type:
-\itemize{
-\item 0 = rate
-\item 1 = percentage
-\item 2 = dollars
-\item 3 = ratio
-\item 4–9 = internal program-specific codes
-}
-\item \code{compare_states_text} – User-friendly text about comparability across states
-\item \code{compare_years_text} – User-friendly text about comparability across years
+A tibble (class \code{tbl_df}, \code{tbl}, \code{data.frame})
+containing one row of metadata for the requested measure.
+
+Columns include:
+\describe{
+\item{year}{Numeric. CHR&R release year.}
+\item{measure_id}{Numeric. Unique identifier for the measure.}
+\item{measure_name}{Character. Official name of the measure.}
+\item{description}{Character. Text description of the measure definition.}
+\item{years_used}{Character. Data years used in calculating the measure.}
+\item{factor_name}{Character. Top-level grouping in the CHR&R model.}
+\item{category_name}{Character. Category within factor.}
+\item{focus_area_name}{Character. Focus area within category.}
+\item{direction}{Numeric. Indicates score orientation:
+\code{1} = higher values are worse,
+\code{-1} = higher values are better.}
+\item{display_precision}{Numeric. Recommended number of decimal places
+for reporting values.}
+\item{format_type}{Numeric. Suggested display format code:
+0 = rate, 1 = percentage, 2 = dollars, 3 = ratio,
+other values reserved for internal codes.}
+\item{compare_states_text}{Character. Notes about comparability across states.}
+\item{compare_years_text}{Character. Notes about comparability across release years.}
 }
 }
 \description{
-Returns key information about a County Health Rankings & Roadmaps measure,
-including measure ID, name, description, years used, factor, category, focus area,
-and comparability information. This function now also silently returns additional
-fields such as \code{display_precision}, \code{format_type}, and \code{direction},
-which may be useful for formatting or analysis.
+Returns structured metadata for a County Health Rankings & Roadmaps
+(CHR&R) measure for a given release year. The metadata describes the
+measure's position within the CHR&R Model of Health, which has evolved over time:
+releases prior to 2025 follow the legacy model, while 2025 and later
+releases use the new model of health. Metadata is year-specific, reflecting the
+measure definitions and groupings used in that release.
 }
 \examples{
-\dontrun{
-# Return metadata (silent fields included)
+\donttest{
+# Return metadata
 md <- get_chrr_measure_metadata(21, 2024)
 md$display_precision
 md$format_type

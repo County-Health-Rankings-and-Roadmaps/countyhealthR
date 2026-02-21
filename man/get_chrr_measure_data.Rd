@@ -8,7 +8,8 @@ get_chrr_measure_data(
   geography = c("county", "state", "national"),
   measure,
   release_year = NULL,
-  refresh = FALSE
+  refresh = FALSE,
+  citation = TRUE
 )
 }
 \arguments{
@@ -34,12 +35,31 @@ Defaults to the most recent release year if \code{NULL}.}
 
 \item{refresh}{Logical. If TRUE, forces re-download of data
 even if a cached version is available.}
+
+\item{citation}{Logical. If \code{TRUE} (default), prints the
+appropriate Zenodo DOI for the requested release year which is useful for citation.
+Set to \code{FALSE} to suppress DOI output.}
 }
 \value{
-A tibble containing filtered CHRR data for the requested geography, measure,
-and release year. Typical columns include:
-\code{state_fips}, \code{county_fips}, \code{measure_id},
-\code{measure_name}, \code{release_year}, and \code{value}.
+A tibble (class \code{tbl_df}, \code{tbl}, \code{data.frame})
+containing CHR&R data for the specified measure, geography,
+and release year.
+
+The tibble contains one row per geographic unit and includes:
+\describe{
+\item{state_fips}{Character. Two-digit state FIPS code.}
+\item{county_fips}{Character. Three-digit county FIPS code.
+Present only for county-level data.}
+\item{raw_value}{Numeric. Reported measure value.}
+\item{numerator}{Numeric. Measure numerator, if available.}
+\item{denominator}{Numeric. Measure denominator, if available.}
+\item{ci_low}{Numeric. Lower confidence interval bound, if available.}
+\item{ci_high}{Numeric. Upper confidence interval bound, if available.}
+}
+
+The returned tibble represents the full set of observations for
+the requested measure at the specified geographic level and
+release year.
 }
 \description{
 Downloads and filters County Health Rankings & Roadmaps (CHR&R) data directly
@@ -50,22 +70,8 @@ The function returns data for the specified measure across the specified geograp
 for the given release year. It mimics the style and behavior of
 \code{tidycensus::get_decennial()}.
 }
-\details{
-The function first reads the measure-year index to
-identify available measures for the specified year, then automatically retrieves
-the correct data file:
-\itemize{
-\item For \code{geography = "county"}, data are pulled from
-\code{t_measure_data_years_[YEAR].csv}.
-\item For \code{geography = "state"} or \code{"national"}, data are pulled from
-\code{t_state_data_years_[YEAR].csv}.
-}
-
-For national data, rows where \code{state_fips == "00"} are retained.
-For state-level data, rows where \code{state_fips != "00"} are retained.
-}
 \examples{
-\dontrun{
+\donttest{
 # Get county-level data for measure 21 (high school graduation) in 2023
 county_data <- get_chrr_measure_data(
                   geography = "county",

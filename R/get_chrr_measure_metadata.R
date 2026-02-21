@@ -1,51 +1,53 @@
 #' Get Metadata for a County Health Rankings & Roadmaps Measure
 #'
-#' Returns key information about a County Health Rankings & Roadmaps measure,
-#' including measure ID, name, description, years used, factor, category, focus area,
-#' and comparability information. This function now also silently returns additional
-#' fields such as `display_precision`, `format_type`, and `direction`,
-#' which may be useful for formatting or analysis.
+#' Returns structured metadata for a County Health Rankings & Roadmaps
+#' (CHR&R) measure for a given release year. The metadata describes the
+#' measure's position within the CHR&R Model of Health, which has evolved over time:
+#' releases prior to 2025 follow the legacy model, while 2025 and later
+#' releases use the new model of health. Metadata is year-specific, reflecting the
+#' measure definitions and groupings used in that release.
 #'
 #' @param measure A \code{character} specifying the measure. Can be either
 #'   a \code{measure_id} or \code{measure_name}.
 #' @param release_year A \code{numeric} specifying the release year for which
 #'   to pull the metadata. Defaults to the most recent release year if
 #'   \code{NULL}.
-#' @return A tibble of measure metadata. Key fields are printed as a summary,
-#'   but additional fields for formatting and comparability are returned silently.
-#'   Returned tibble columns include:
-#'   \itemize{
-#'     \item \code{year} – Release year
-#'     \item \code{measure_id} – Unique measure identifier
-#'     \item \code{measure_name} – Name of the measure
-#'     \item \code{description} – Measure description
-#'     \item \code{years_used} – Years for which the measure is reported
-#'     \item \code{factor_name}, \code{category_name}, \code{focus_area_name} – Measure hierarchy
-#'     \item \code{direction} – Score orientation: 1 means higher values are worse, -1 means higher values are better
-#'     \item \code{display_precision} – Recommended number of decimal places for display
-#'     \item \code{format_type} – Suggested format type:
-#'       \itemize{
-#'         \item 0 = rate
-#'         \item 1 = percentage
-#'         \item 2 = dollars
-#'         \item 3 = ratio
-#'         \item 4–9 = internal program-specific codes
-#'       }
-#'     \item \code{compare_states_text} – User-friendly text about comparability across states
-#'     \item \code{compare_years_text} – User-friendly text about comparability across years
-#'   }
-#' @export
+#' @return
+#' A tibble (class \code{tbl_df}, \code{tbl}, \code{data.frame})
+#' containing one row of metadata for the requested measure.
+#'
+#' Columns include:
+#' \describe{
+#'   \item{year}{Numeric. CHR&R release year.}
+#'   \item{measure_id}{Numeric. Unique identifier for the measure.}
+#'   \item{measure_name}{Character. Official name of the measure.}
+#'   \item{description}{Character. Text description of the measure definition.}
+#'   \item{years_used}{Character. Data years used in calculating the measure.}
+#'   \item{factor_name}{Character. Top-level grouping in the CHR&R model.}
+#'   \item{category_name}{Character. Category within factor.}
+#'   \item{focus_area_name}{Character. Focus area within category.}
+#'   \item{direction}{Numeric. Indicates score orientation:
+#'     \code{1} = higher values are worse,
+#'     \code{-1} = higher values are better.}
+#'   \item{display_precision}{Numeric. Recommended number of decimal places
+#'     for reporting values.}
+#'   \item{format_type}{Numeric. Suggested display format code:
+#'     0 = rate, 1 = percentage, 2 = dollars, 3 = ratio,
+#'     other values reserved for internal codes.}
+#'   \item{compare_states_text}{Character. Notes about comparability across states.}
+#'   \item{compare_years_text}{Character. Notes about comparability across release years.}
+#' }
+
 #' @examples
-#' \dontrun{
-#' # Return metadata (silent fields included)
+#' \donttest{
+#' # Return metadata
 #' md <- get_chrr_measure_metadata(21, 2024)
 #' md$display_precision
 #' md$format_type
 #' md$direction
 #' md$compare_states_text
 #' }
-#' @importFrom rlang .data
-
+#' @export
 get_chrr_measure_metadata <- function(measure, release_year = NULL) {
 
   .check_internet()
@@ -56,9 +58,6 @@ get_chrr_measure_metadata <- function(measure, release_year = NULL) {
     if (is.null(release_year)) {
       release_year <- most_recent
     }
-
-  message(paste0("Loading CHR&R measure metadata for release year ", release_year))
-
 
   measure_map = get_measure_map()
   # --- Validate release_year dynamically ---
@@ -89,19 +88,6 @@ get_chrr_measure_metadata <- function(measure, release_year = NULL) {
     return(dplyr::tibble())  # return empty tibble instead of NULL
   }
 
-  cat("\nMeasure ID:       ", metadata$measure_id, "\n")
-  cat("Measure Name:     ", metadata$measure_name, "\n")
-  cat("Description:      ", metadata$description, "\n")
-  cat("Years Used:       ", paste(metadata$years_used, collapse = ", "), "\n")
-  cat("Factor Name:      ", metadata$factor_name, "\n")
-  cat("Category Name:    ", metadata$category_name, "\n")
-  cat("Focus Area Name:  ", metadata$focus_area_name, "\n")
-  cat("Compare across states:", metadata$compare_states_text, "\n")
-  cat("Compare across release years: ", metadata$compare_years_text, "\n")
-
-  message(print_zenodo_citation(year = release_year))
-
-  # Return metadata as tibble but don't print it
-  invisible(metadata)
+ return(metadata)
 
 }
