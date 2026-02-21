@@ -1,6 +1,6 @@
 #' List available CHR&R measures for a given release year
 #'
-#' Downloads metadata for measures and returns their identifiers,
+#' Downloads metadata for a release year and returns measure identifiers,
 #' names, and descriptions.
 #'
 #' @param release_year Numeric year corresponding to the year of
