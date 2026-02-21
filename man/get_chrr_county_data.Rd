@@ -9,7 +9,8 @@ get_chrr_county_data(
   county = NULL,
   release_year = NULL,
   refresh = FALSE,
-  citation = TRUE
+  citation = TRUE,
+  verbose = TRUE
 )
 }
 \arguments{
@@ -34,6 +35,10 @@ Defaults to \code{FALSE}.}
 \item{citation}{\code{Logical}. If \code{TRUE} (default), prints the
 appropriate Zenodo DOI for the requested release year which is useful for citation.
 Set to \code{FALSE} to suppress DOI output.}
+
+\item{verbose}{\code{Logical}. If \code{TRUE} (default), additional information about the
+selected geography is displayed.
+Set to \code{FALSE} to return only the requested \code{data.frame}.}
 }
 \value{
 A tibble (class \code{tbl_df}, \code{tbl}, \code{data.frame})

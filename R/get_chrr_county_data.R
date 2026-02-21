@@ -27,6 +27,9 @@
 #' @param citation \code{Logical}. If \code{TRUE} (default), prints the
 #'   appropriate Zenodo DOI for the requested release year which is useful for citation.
 #'   Set to \code{FALSE} to suppress DOI output.
+#' @param verbose \code{Logical}. If \code{TRUE} (default), additional information about the
+#'   selected geography is displayed.
+#'   Set to \code{FALSE} to return only the requested \code{data.frame}.
 #'
 #' @return
 #' A tibble (class \code{tbl_df}, \code{tbl}, \code{data.frame})
@@ -73,7 +76,8 @@ get_chrr_county_data <- function(state,
                                  county = NULL,
                                  release_year = NULL,
                                  refresh = FALSE,
-                                 citation = TRUE) {
+                                 citation = TRUE,
+                                 verbose = TRUE) {
 
   .check_internet()
 
@@ -181,6 +185,15 @@ get_chrr_county_data <- function(state,
       message(print_zenodo_citation(release_year))
     }
 
+    if (isTRUE(verbose)) {
+      message(
+        "\n\n Returning CHR&R data for ",
+        state_name_resolved,
+        " (fipscode ", state_fips_input,
+        ") for release year ", release_year, ".\n\n"
+      )
+    }
+
     return(out)
   }
 
@@ -252,6 +265,17 @@ get_chrr_county_data <- function(state,
 
   if (isTRUE(citation)) {
     message(print_zenodo_citation(release_year))
+  }
+
+  if (isTRUE(verbose)) {
+    message(
+      "\n\n Returning CHR&R data for ",
+      county_name_resolved, ", ",
+      state_name_resolved,
+      " (fipscode ", state_fips_input,
+      county_fips_input,
+      ") for release year ", release_year, ".\n\n"
+    )
   }
 
 

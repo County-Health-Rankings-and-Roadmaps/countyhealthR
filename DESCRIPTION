@@ -1,7 +1,7 @@
 Package: countyhealthR
 Type: Package
 Title: Programmatic Access to County Health Rankings & Roadmaps Data
-Version: 0.1.2
+Version: 0.1.3
 Authors@R: 
     person("Hannah", "Olson-Williams", 
            email = "hannaheow@gmail.com", 
